@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <title>Notifications · Simha</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --surface: #ffffff;
+            --border: #e8ecf0;
+            --ink: #0d0d0d;
+            --ink-2: #6b727a;
+            --accent: #0a6b5e;
+            --accent-2: #e63b2e;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-pill: 999px;
+            --shadow-xs: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-sm: 0 2px 12px rgba(0,0,0,0.06);
+            --shadow-md: 0 8px 30px rgba(0,0,0,0.08);
+            --nav-h: 56px;
+            --bottom-nav-h: 56px;
+            --transition: 0.3s cubic-bezier(0.25,0.1,0.25,1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            width: 100%;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg);
+            padding: 0 16px 80px;
+        }
+
+        /* ── TOP NAV (Desktop) ── */
+        .top-nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: var(--nav-h);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            border-radius: 0 0 12px 12px;
+            margin-bottom: 16px;
+        }
+        .top-nav .logo {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .top-nav .logo span { color: var(--accent); }
+        .top-nav .nav-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+            align-items: center;
+        }
+        .top-nav .nav-links a {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--ink-2);
+            transition: color 0.2s;
+            padding: 4px 0;
+            position: relative;
+            text-decoration: none;
+        }
+        .top-nav .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width var(--transition);
+        }
+        .top-nav .nav-links a:hover::after,
+        .top-nav .nav-links a.active::after { width: 100%; }
+        .top-nav .nav-links a:hover { color: var(--ink); }
+        .top-nav .nav-links a.active { color: var(--ink); font-weight: 600; }
+        .top-nav .nav-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .top-nav .nav-actions .profile-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            color: var(--ink);
+        }
+        .top-nav .nav-actions .profile-btn:hover { border-color: var(--accent); }
+        .top-nav .nav-actions .profile-btn img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .top-nav .nav-actions .notif-btn {
+            position: relative;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            min-width: 36px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+            background: none;
+            border: none;
+            color: var(--ink);
+        }
+        .top-nav .nav-actions .notif-btn:hover { background: var(--bg); }
+        .top-nav .nav-actions .notif-btn .badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--accent-2);
+            color: #fff;
+            font-size: 8px;
+            font-weight: 700;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--surface);
+        }
+        .top-nav .nav-actions .notif-btn .badge.show { display: flex; }
+
+        @media (min-width: 768px) {
+            .top-nav { display: flex; }
+            .app { padding: 0 24px 80px; }
+        }
+
+        /* ── HEADER (Mobile) ── */
+        .header {
+            background: var(--surface);
+            padding: 8px 14px 10px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-radius: 0 0 12px 12px;
+            margin-bottom: 12px;
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-top .brand {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header-top .brand h1 {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .header-top .brand h1 span { color: var(--accent); }
+        .header-top .brand .tag {
+            font-size: 9px;
+            color: var(--ink-2);
+            font-weight: 400;
+        }
+        .header-top .actions {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .header-top .actions button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.04);
+            color: var(--ink);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            position: relative;
+            min-width: 36px;
+            min-height: 36px;
+            border: none;
+        }
+        .header-top .actions button:active { background: rgba(0,0,0,0.1); }
+        .header-top .actions button .badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--accent-2);
+            color: #fff;
+            font-size: 8px;
+            font-weight: 700;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--surface);
+        }
+        .header-top .actions button .badge.show { display: flex; }
+
+        @media (min-width: 768px) {
+            .header { display: none; }
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 18px 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-xs);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .card-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-header .badge-count {
+            background: var(--accent);
+            color: #fff;
+            border-radius: 40px;
+            padding: 0 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #eef2f6;
+        }
+        .role-badge.admin { background: #000; color: #fff; }
+        .role-badge.shop { background: #d4e2f0; color: #0b2a44; }
+        .role-badge.customer { background: #e6edf5; color: #1a2a3a; }
+
+        /* ── NOTIFICATION LIST ── */
+        .notif-list { display: flex; flex-direction: column; gap: 12px; }
+        .notif-item {
+            background: #fafbfc;
+            border-radius: 14px;
+            padding: 14px 14px 12px;
+            border: 1px solid #eef1f4;
+            transition: 0.1s;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .notif-item:hover { border-color: #cbd5e1; }
+        .notif-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            background: #eef2f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            overflow: hidden;
+        }
+        .notif-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 40px; }
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-title { font-weight: 600; font-size: 15px; line-height: 1.3; word-break: break-word; }
+        .notif-body { font-size: 13px; color: #2c3a4f; margin-top: 4px; line-height: 1.5; word-break: break-word; }
+        .notif-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 14px;
+            margin-top: 6px;
+            font-size: 11px;
+            color: #5e6f8d;
+        }
+        .notif-meta .tag {
+            background: #eef2f6;
+            padding: 1px 10px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 10px;
+            color: #1f2a3f;
+        }
+        .notif-meta .time { display: flex; align-items: center; gap: 4px; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 16px;
+            color: #6b7a93;
+        }
+        .empty-state .big-emoji { font-size: 44px; display: block; margin-bottom: 8px; }
+        .empty-state h3 { font-size: 17px; color: var(--ink); }
+
+        /* ── FORM ── */
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d8dfe8;
+            border-radius: 14px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            background: #fff;
+            transition: 0.15s;
+            -webkit-appearance: none;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(10,107,94,0.08);
+        }
+        .form-group textarea { min-height: 72px; resize: vertical; }
+
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: #f4f6fa;
+            border-radius: 14px;
+            border: 1px dashed #cbd5e1;
+            cursor: pointer;
+            font-size: 13px;
+            color: #2c3a4f;
+            transition: 0.15s;
+        }
+        .file-upload-label:hover { border-color: var(--accent); background: #edf0f5; }
+        .file-preview {
+            margin-top: 8px;
+            max-height: 120px;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+        }
+        .file-preview.show { display: block; }
+        .file-preview img { width: 100%; height: auto; max-height: 120px; object-fit: cover; border-radius: 12px; }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.15s;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-primary:hover { opacity: 0.85; }
+        .btn-primary:disabled { opacity: 0.4; pointer-events: none; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d0d8e0;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: 0.15s;
+        }
+        .btn-outline:hover { border-color: var(--ink); background: #f4f6f8; }
+        .flex-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+
+        /* ── SEND CARD (hidden by default) ── */
+        #sendCard { display: none; }
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 54px;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(14px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            padding: 4px 0 6px;
+            z-index: 100;
+            flex-shrink: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .bn-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            font-size: 8px;
+            font-weight: 500;
+            color: var(--ink-2);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            min-width: 44px;
+            min-height: 36px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            transition: color 0.2s;
+            position: relative;
+            text-decoration: none;
+        }
+        .bn-item.active { color: var(--accent); }
+        .bn-item .bn-icon { font-size: 17px; }
+        .bn-item .badge {
+            position: absolute;
+            top: 0;
+            right: 2px;
+            background: var(--accent-2);
+            color: #fff;
+            font-size: 7px;
+            font-weight: 700;
+            min-width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 2px;
+        }
+        .bn-item .badge.show { display: flex; }
+
+        @media (min-width: 768px) {
+            .bottom-nav { display: none !important; }
+        }
+
+        /* ── TOAST ── */
+        #toastContainer {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            width: 92%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+            pointer-events: none;
+        }
+        .toast {
+            background: #1e2226;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            font-size: 13px;
+            font-weight: 500;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: auto;
+            animation: slideUp 0.25s ease;
+        }
+        .toast.success { background: #0b2e1a; }
+        .toast.error { background: #7a1a1a; }
+        .toast.warning { background: #6b4f00; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (min-width: 768px) {
+            #toastContainer { bottom: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <!-- TOP NAV (Desktop) -->
+    <nav class="top-nav">
+        <div class="logo">🦁 <span>Simha</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop-listing.html">Shops</a></li>
+            <li><a href="categories.html">Categories</a></li>
+            <li><a href="orders.html">Orders</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="notifications.html" class="active">Notifications</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button class="notif-btn" onclick="window.location.href='notifications.html'">
+                🔔
+                <span class="badge" id="notifBadge">0</span>
+            </button>
+            <div class="profile-btn" id="profileAvatar" onclick="window.location.href='profile.html'">👤</div>
+        </div>
+    </nav>
+
+    <!-- HEADER (Mobile) -->
+    <header class="header">
+        <div class="header-top">
+            <div class="brand">
+                <h1>🦁 <span>Simha</span> <span class="tag">Nepal</span></h1>
+            </div>
+            <div class="actions">
+                <button onclick="window.location.href='notifications.html'">
+                    🔔
+                    <span class="badge" id="notifBadgeMobile">0</span>
+                </button>
+                <button onclick="window.location.href='profile.html'">👤</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:4px 0 12px;">
+        <h2 style="font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px;">
+            📨 Notifications
+            <span class="badge-count" id="notifCounter" style="background:var(--accent);color:#fff;border-radius:40px;padding:0 12px;font-size:13px;font-weight:600;">0</span>
+        </h2>
+        <span id="roleDisplay" class="role-badge customer">👤 Customer · view only</span>
+    </div>
+
+    <!-- ===== LIVE FEED (FIRST) ===== -->
+    <div class="card" style="padding-bottom:8px;">
+        <div class="card-header">
+            <h2>📬 Live feed</h2>
+            <span style="font-size:12px;color:var(--ink-2);" id="liveIndicator">🟢 realtime</span>
+        </div>
+        <div id="notificationsList" class="notif-list">
+            <div class="empty-state">
+                <span class="big-emoji">📭</span>
+                <h3>No notifications</h3>
+                <p>Check back later.</p>
+            </div>
+        </div>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;">
+            <button class="btn-outline" id="refreshBtn" style="font-size:12px;">↻ Refresh</button>
+            <button class="btn-outline" id="clearAllBtn" style="color:#a00;border-color:#f0d0d0;font-size:12px;">🗑️ Clear all</button>
+        </div>
+    </div>
+
+    <!-- ===== SEND CARD (below feed) ===== -->
+    <div class="card" id="sendCard">
+        <h3 style="font-size:17px;margin-bottom:4px;">✉️ Send notification</h3>
+        <p style="color:var(--ink-2);font-size:13px;margin-bottom:14px;">Image upload from device supported</p>
+        <form id="notifForm">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="notifTitle" placeholder="e.g. 🎉 Weekend sale" value="Special offer!">
+            </div>
+            <div class="form-group">
+                <label>Message *</label>
+                <textarea id="notifBody" placeholder="Write your message..." required>Get 20% off on all items. Use code SIMHA20.</textarea>
+            </div>
+            <div class="form-group">
+                <label>Target audience</label>
+                <select id="notifTarget">
+                    <option value="all">All users</option>
+                    <option value="customer">Customers only</option>
+                    <option value="shop">Shop owners only</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Upload image (from device)</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="notifImageFile" accept="image/*">
+                    <div class="file-upload-label">📸 Click to choose image</div>
+                </div>
+                <div class="file-preview" id="imagePreview"><img src="" alt="preview"></div>
+            </div>
+            <div class="form-group">
+                <label>Deep link (optional)</label>
+                <input type="text" id="notifLink" placeholder="/shop-detail.html?shopId=SIM001" value="/shop-listing.html">
+            </div>
+            <button type="submit" class="btn-primary" id="sendNotifBtn">📤 Send notification</button>
+        </form>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <a class="bn-item" href="index.html">
+            <span class="bn-icon">🏠</span>Home
+        </a>
+        <a class="bn-item" href="shop-listing.html">
+            <span class="bn-icon">🏪</span>Shops
+        </a>
+        <a class="bn-item" href="cart.html">
+            <span class="bn-icon">🛒</span>Cart
+            <span class="badge" id="cartBadge">0</span>
+        </a>
+        <a class="bn-item" href="orders.html">
+            <span class="bn-icon">📋</span>Orders
+        </a>
+        <a class="bn-item active" href="profile.html">
+            <span class="bn-icon">👤</span>Profile
+        </a>
+    </nav>
+
+</div>
+
+<div id="toastContainer"></div>
+
+<script type="importmap">
+{
+    "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+    }
+}
+</script>
+
+<script type="module">
+import { initializeApp } from 'firebase/app';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import {
+    getFirestore, collection, doc, getDocs, getDoc, setDoc, deleteDoc,
+    query, orderBy, onSnapshot, serverTimestamp, limit
+} from 'firebase/firestore';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDJLnUB8XnXWPEtSRAMuQr9ASmD16HLIJc",
+    authDomain: "bishalshrestha17-de676.firebaseapp.com",
+    projectId: "bishalshrestha17-de676",
+    storageBucket: "bishalshrestha17-de676.firebasestorage.app",
+    messagingSenderId: "631628771230",
+    appId: "1:631628771230:web:389c6430535f6a46b6708f"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// DOM
+const listEl = document.getElementById('notificationsList');
+const counterEl = document.getElementById('notifCounter');
+const toastContainer = document.getElementById('toastContainer');
+const notifForm = document.getElementById('notifForm');
+const sendBtn = document.getElementById('sendNotifBtn');
+const refreshBtn = document.getElementById('refreshBtn');
+const clearAllBtn = document.getElementById('clearAllBtn');
+const sendCard = document.getElementById('sendCard');
+const roleDisplay = document.getElementById('roleDisplay');
+const imageFileInput = document.getElementById('notifImageFile');
+const imagePreview = document.getElementById('imagePreview');
+const notifBadge = document.getElementById('notifBadge');
+const notifBadgeMobile = document.getElementById('notifBadgeMobile');
+const cartBadge = document.getElementById('cartBadge');
+
+let currentUserRole = 'customer';
+let unsubscribe = null;
+let allNotifs = [];
+
+// ── TOAST ──
+function showToast(msg, type = 'success') {
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    toastContainer.appendChild(t);
+    setTimeout(() => {
+        t.style.transition = 'opacity 0.3s,transform 0.3s';
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        setTimeout(() => t.remove(), 300);
+    }, 2800);
+}
+window.showToast = showToast;
+
+// ── IMAGE PREVIEW ──
+imageFileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const img = imagePreview.querySelector('img');
+            img.src = ev.target.result;
+            imagePreview.classList.add('show');
+        };
+        reader.readAsDataURL(file);
+    } else {
+        imagePreview.classList.remove('show');
+    }
+});
+
+// ── UPLOAD TO IMGBB ──
+async function uploadToImageBB(file) {
+    return new Promise((resolve, reject) => {
+        const valid = ['image/jpeg','image/png','image/webp','image/gif'];
+        if (!valid.includes(file.type)) reject(new Error('Invalid image type (JPG, PNG, WEBP, GIF)'));
+        if (file.size > 5 * 1024 * 1024) reject(new Error('Image max 5MB'));
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const base64 = e.target.result.split(',')[1];
+            const formData = new FormData();
+            formData.append('key', 'f69fb2e400656818bbdb2b33cb144c3f');
+            formData.append('image', base64);
+            try {
+                const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) resolve(data.data.url);
+                else reject(new Error(data.error?.message || 'Upload failed'));
+            } catch (err) { reject(err); }
+        };
+        reader.onerror = () => reject(new Error('File read error'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// ── RENDER ──
+function renderNotifications(notifs) {
+    allNotifs = notifs;
+    if (!notifs || notifs.length === 0) {
+        listEl.innerHTML = `
+            <div class="empty-state">
+                <span class="big-emoji">📭</span>
+                <h3>No notifications</h3>
+                <p>Be the first to send one.</p>
+            </div>
+        `;
+        counterEl.textContent = '0';
+        updateBadge(0);
+        return;
+    }
+    counterEl.textContent = notifs.length;
+    const unreadCount = notifs.length; // simplified: all are "unread" for demo
+    updateBadge(unreadCount > 99 ? 99 : unreadCount);
+
+    listEl.innerHTML = notifs.map(n => {
+        const iconHtml = n.imageURL 
+            ? `<img src="${n.imageURL}" alt="img" loading="lazy" onerror="this.parentElement.innerHTML='📷'">` 
+            : '📢';
+        const targetLabel = n.targetRole === 'shop' ? '🏪 Shop' : 
+                           n.targetRole === 'customer' ? '👤 Customer' : '🌐 All';
+        const time = n.createdAt?.toDate?.() 
+            ? new Date(n.createdAt.toDate()).toLocaleString('en-IN', { hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' })
+            : 'Just now';
+        return `
+            <div class="notif-item" data-id="${n.id}">
+                <div class="notif-icon">${iconHtml}</div>
+                <div class="notif-content">
+                    <div class="notif-title">${n.title || 'Untitled'}</div>
+                    <div class="notif-body">${n.body || ''}</div>
+                    <div class="notif-meta">
+                        <span class="tag">${targetLabel}</span>
+                        <span class="time">🕒 ${time}</span>
+                        ${n.link ? `<span class="tag" style="background:#e8edf5;">🔗 link</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateBadge(count) {
+    const txt = count > 99 ? '99+' : count;
+    [notifBadge, notifBadgeMobile].forEach(el => {
+        if (el) { el.textContent = txt; el.classList.toggle('show', count > 0); }
+    });
+}
+
+// ── REALTIME SUBSCRIBE ──
+function subscribeToNotifications() {
+    if (unsubscribe) unsubscribe();
+    try {
+        const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(50));
+        unsubscribe = onSnapshot(q, (snapshot) => {
+            const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderNotifications(notifs);
+        }, (error) => {
+            console.error('Snapshot error:', error);
+            showToast('⚠️ Realtime error', 'error');
+        });
+    } catch (e) {
+        showToast('⚠️ Subscribe failed: ' + e.message, 'error');
+    }
+}
+
+// ── MANUAL REFRESH ──
+async function manualRefresh() {
+    try {
+        const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(50));
+        const snap = await getDocs(q);
+        const notifs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderNotifications(notifs);
+        showToast('↻ Refreshed', 'success');
+    } catch (e) {
+        showToast('Refresh failed', 'error');
+    }
+}
+refreshBtn.addEventListener('click', manualRefresh);
+
+// ── SEND NOTIFICATION ──
+notifForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    sendBtn.disabled = true;
+    sendBtn.textContent = '⏳ Sending...';
+
+    const title = document.getElementById('notifTitle').value.trim() || 'Update';
+    const body = document.getElementById('notifBody').value.trim();
+    const target = document.getElementById('notifTarget').value;
+    const link = document.getElementById('notifLink').value.trim();
+    const imageFile = document.getElementById('notifImageFile').files[0];
+
+    if (!body) {
+        showToast('Please enter a message', 'error');
+        sendBtn.disabled = false;
+        sendBtn.textContent = '📤 Send notification';
+        return;
+    }
+
+    try {
+        let imageURL = '';
+        if (imageFile) {
+            showToast('📤 Uploading image...', 'success');
+            imageURL = await uploadToImageBB(imageFile);
+        }
+
+        await setDoc(doc(collection(db, 'notifications')), {
+            title,
+            body,
+            targetRole: target,
+            imageURL: imageURL || '',
+            link: link || '',
+            sentBy: currentUserRole === 'admin' ? 'admin' : 'shop',
+            sentByRole: currentUserRole,
+            isActive: true,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+        showToast('✅ Notification sent!', 'success');
+        // reset
+        imageFileInput.value = '';
+        imagePreview.classList.remove('show');
+        notifForm.reset();
+        document.getElementById('notifTitle').value = 'Special offer!';
+        document.getElementById('notifBody').value = 'Get 20% off on all items. Use code SIMHA20.';
+        document.getElementById('notifLink').value = '/shop-listing.html';
+    } catch (err) {
+        showToast('❌ Failed: ' + err.message, 'error');
+    } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = '📤 Send notification';
+    }
+});
+
+// ── CLEAR ALL (admin only) ──
+clearAllBtn.addEventListener('click', async () => {
+    if (currentUserRole !== 'admin') {
+        showToast('Only admin can clear', 'error');
+        return;
+    }
+    if (!confirm('⚠️ Delete ALL notifications permanently?')) return;
+    try {
+        const q = query(collection(db, 'notifications'));
+        const snap = await getDocs(q);
+        if (snap.empty) { showToast('Nothing to clear', 'warning'); return; }
+        const batch = snap.docs.map(d => deleteDoc(doc(db, 'notifications', d.id)));
+        await Promise.all(batch);
+        showToast(`🗑️ ${batch.length} cleared`, 'success');
+    } catch (e) {
+        showToast('Clear failed: ' + e.message, 'error');
+    }
+});
+
+// ── CART BADGE ──
+async function updateCartBadge() {
+    const user = auth.currentUser;
+    if (!user) { cartBadge.classList.remove('show'); return; }
+    try {
+        const c = await getDoc(doc(db, 'cart', user.uid));
+        const count = c.exists() ? (c.data().items || []).reduce((s, i) => s + (i.qty || 0), 0) : 0;
+        cartBadge.textContent = count > 99 ? '99+' : count;
+        cartBadge.classList.toggle('show', count > 0);
+    } catch {}
+}
+
+// ── AUTH & ROLE ──
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        document.body.innerHTML = `
+            <div style="max-width:400px;margin:60px auto;text-align:center;padding:32px;background:#fff;border-radius:28px;">
+                <div style="font-size:48px;">🔐</div>
+                <h2 style="margin:12px 0 6px;">Login required</h2>
+                <p style="color:#5e6f8d;"><a href="auth.html" style="color:var(--accent);font-weight:600;">Sign in</a> to continue</p>
+            </div>
+        `;
+        return;
+    }
+
+    try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists()) {
+            currentUserRole = 'customer';
+            roleDisplay.textContent = '👤 Customer · view only';
+            roleDisplay.className = 'role-badge customer';
+            sendCard.style.display = 'none';
+            subscribeToNotifications();
+            updateCartBadge();
+            return;
+        }
+        const role = userDoc.data().role || 'customer';
+        currentUserRole = role;
+
+        // Update UI based on role
+        if (role === 'admin') {
+            roleDisplay.textContent = '🛡️ Admin · can send & clear';
+            roleDisplay.className = 'role-badge admin';
+            sendCard.style.display = 'block';
+            clearAllBtn.style.display = 'inline-block';
+        } else if (role === 'shop') {
+            roleDisplay.textContent = '🏪 Shop owner · can send notifications';
+            roleDisplay.className = 'role-badge shop';
+            sendCard.style.display = 'block';
+            clearAllBtn.style.display = 'none';
+        } else {
+            roleDisplay.textContent = '👤 Customer · view only';
+            roleDisplay.className = 'role-badge customer';
+            sendCard.style.display = 'none';
+            clearAllBtn.style.display = 'none';
+        }
+
+        subscribeToNotifications();
+        updateCartBadge();
+
+        // Update profile avatar
+        const avatar = document.getElementById('profileAvatar');
+        if (avatar) {
+            const name = user.displayName || user.email || 'User';
+            avatar.textContent = name.charAt(0).toUpperCase();
+            if (user.photoURL) {
+                avatar.innerHTML = `<img src="${user.photoURL}" alt="${name}">`;
+            }
+        }
+
+    } catch (e) {
+        console.error('Role fetch error:', e);
+        currentUserRole = 'customer';
+        roleDisplay.textContent = '👤 Customer · view only';
+        roleDisplay.className = 'role-badge customer';
+        sendCard.style.display = 'none';
+        subscribeToNotifications();
+    }
+});
+
+// fallback
+setTimeout(() => {
+    if (!unsubscribe && auth.currentUser) {
+        subscribeToNotifications();
+    }
+}, 2000);
+
+window.addEventListener('beforeunload', () => { if (unsubscribe) unsubscribe(); });
+
+console.log('📨 Notifications · live feed first, send form below · role-based (admin/shop send, customer view)');
+</script>
+
+</body>
+</html>

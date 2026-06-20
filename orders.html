@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <title>Orders - Simha</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --surface: #ffffff;
+            --border: #e8ecf0;
+            --ink: #0d0d0d;
+            --ink-2: #6b727a;
+            --accent: #0a6b5e;
+            --accent-2: #e63b2e;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-pill: 999px;
+            --shadow-xs: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-sm: 0 2px 12px rgba(0,0,0,0.06);
+            --shadow-md: 0 8px 30px rgba(0,0,0,0.08);
+            --nav-h: 56px;
+            --bottom-nav-h: 56px;
+            --transition: 0.3s cubic-bezier(0.25,0.1,0.25,1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            width: 100%;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg);
+            padding: 0 16px 80px;
+        }
+
+        .top-nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: var(--nav-h);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            border-radius: 0 0 12px 12px;
+            margin-bottom: 16px;
+        }
+        .top-nav .logo { font-size: 20px; font-weight: 800; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+        .top-nav .logo span { color: var(--accent); }
+        .top-nav .nav-links { display: flex; gap: 28px; list-style: none; align-items: center; }
+        .top-nav .nav-links a {
+            font-size: 14px; font-weight: 500; color: var(--ink-2); transition: color 0.2s;
+            padding: 4px 0; position: relative; text-decoration: none;
+        }
+        .top-nav .nav-links a::after {
+            content: ''; position: absolute; bottom: -2px; left: 0; width: 0;
+            height: 2px; background: var(--accent); transition: width var(--transition);
+        }
+        .top-nav .nav-links a:hover::after, .top-nav .nav-links a.active::after { width: 100%; }
+        .top-nav .nav-links a:hover { color: var(--ink); }
+        .top-nav .nav-links a.active { color: var(--ink); font-weight: 600; }
+        .top-nav .nav-actions { display: flex; gap: 10px; align-items: center; }
+        .top-nav .nav-actions .profile-btn {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--bg);
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 14px; cursor: pointer; transition: border-color 0.2s;
+            color: var(--ink); overflow: hidden;
+        }
+        .top-nav .nav-actions .profile-btn:hover { border-color: var(--accent); }
+        .top-nav .nav-actions .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
+        .top-nav .nav-actions .notif-btn {
+            position: relative; font-size: 18px; cursor: pointer; padding: 4px;
+            min-width: 36px; min-height: 36px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; transition: background 0.2s; background: none; border: none; color: var(--ink);
+        }
+        .top-nav .nav-actions .notif-btn:hover { background: var(--bg); }
+        .top-nav .nav-actions .notif-btn .badge {
+            position: absolute; top: 0; right: 0; background: var(--accent-2); color: #fff;
+            font-size: 8px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center; border: 2px solid var(--surface);
+        }
+        .top-nav .nav-actions .notif-btn .badge.show { display: flex; }
+
+        @media (min-width: 768px) {
+            .top-nav { display: flex; }
+            .app { padding: 0 24px 20px; }
+        }
+
+        .header {
+            background: var(--surface); padding: 8px 14px 10px; flex-shrink: 0;
+            border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px;
+            border-radius: 0 0 12px 12px; margin-bottom: 12px;
+        }
+        .header-top { display: flex; align-items: center; justify-content: space-between; }
+        .header-top .brand { display: flex; align-items: center; gap: 6px; }
+        .header-top .brand h1 { font-size: 17px; font-weight: 800; color: var(--ink); display: flex; align-items: center; gap: 4px; }
+        .header-top .brand h1 span { color: var(--accent); }
+        .header-top .brand .tag { font-size: 9px; color: var(--ink-2); font-weight: 400; }
+        .header-top .actions { display: flex; gap: 4px; align-items: center; }
+        .header-top .actions button {
+            width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.04);
+            color: var(--ink); font-size: 16px; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s; position: relative; min-width: 36px; min-height: 36px; border: none;
+        }
+        .header-top .actions button:active { background: rgba(0,0,0,0.1); }
+        .header-top .actions button .badge {
+            position: absolute; top: -2px; right: -2px; background: var(--accent-2); color: #fff;
+            font-size: 8px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center; border: 2px solid var(--surface);
+        }
+        .header-top .actions button .badge.show { display: flex; }
+        @media (min-width: 768px) { .header { display: none; } }
+
+        .page-header {
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: 12px 0 8px;
+        }
+        .page-header h1 { font-size: 24px; font-weight: 800; }
+        .page-header .count-badge {
+            background: var(--accent); color: #fff; padding: 2px 12px; border-radius: 40px;
+            font-size: 13px; font-weight: 600;
+        }
+
+        .filter-tabs {
+            display: flex; gap: 4px; overflow-x: auto; padding: 4px 0 12px;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+        }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+        .filter-tab {
+            flex-shrink: 0; padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 500;
+            color: var(--ink-2); border: 1px solid transparent; transition: all 0.2s;
+            cursor: pointer; background: none; font-family: 'Inter', sans-serif;
+        }
+        .filter-tab:hover { color: var(--ink); border-color: var(--border); }
+        .filter-tab.active { color: #fff; background: var(--ink); border-color: var(--ink); }
+        .filter-tab .count { font-size: 10px; opacity: 0.7; margin-left: 4px; }
+
+        .order-card {
+            background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border);
+            margin-bottom: 12px; overflow: hidden; box-shadow: var(--shadow-xs); transition: box-shadow 0.2s;
+        }
+        .order-card:hover { box-shadow: var(--shadow-sm); }
+
+        .order-card .order-header {
+            padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 8px; cursor: pointer; border-bottom: 1px solid #f0f2f5; transition: background 0.1s;
+        }
+        .order-card .order-header:hover { background: #fafbfc; }
+        .order-card .order-header .order-id { font-weight: 600; font-size: 14px; }
+        .order-card .order-header .order-date { font-size: 12px; color: var(--ink-2); }
+        .order-card .order-header .order-status {
+            font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 50px; text-transform: capitalize;
+        }
+        .order-card .order-header .order-status.pending { background: #fef3c7; color: #92400e; }
+        .order-card .order-header .order-status.confirmed { background: #dbeafe; color: #1e40af; }
+        .order-card .order-header .order-status.shipped { background: #e0f2fe; color: #0369a1; }
+        .order-card .order-header .order-status.delivered { background: #d1fae5; color: #065f46; }
+        .order-card .order-header .order-status.cancelled { background: #fee2e2; color: #991b1b; }
+
+        .order-card .order-body {
+            padding: 14px 16px; display: none; border-bottom: 1px solid #f0f2f5;
+        }
+        .order-card .order-body.expanded { display: block; }
+        .order-card .order-body .order-shop { font-weight: 600; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .order-card .order-body .order-item {
+            display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #f5f6f8;
+        }
+        .order-card .order-body .order-item:last-child { border-bottom: none; }
+        .order-card .order-body .order-item img {
+            width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; background: #f0f2f5;
+        }
+        .order-card .order-body .order-item .item-details { flex: 1; }
+        .order-card .order-body .order-item .item-details .name { font-size: 13px; font-weight: 500; }
+        .order-card .order-body .order-item .item-details .qty { font-size: 12px; color: var(--ink-2); }
+        .order-card .order-body .order-item .item-price { font-weight: 600; font-size: 13px; }
+
+        .tracking-stepper { padding: 8px 0 4px; margin-top: 8px; border-top: 1px solid #f0f2f5; }
+        .tracking-step {
+            display: flex; align-items: flex-start; gap: 12px; padding: 6px 0; position: relative;
+        }
+        .tracking-step .step-dot {
+            width: 12px; height: 12px; border-radius: 50%; background: var(--border);
+            flex-shrink: 0; margin-top: 2px; border: 2px solid var(--border); transition: all 0.3s;
+        }
+        .tracking-step .step-dot.active {
+            background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px rgba(10,107,94,0.15);
+        }
+        .tracking-step .step-dot.completed { background: var(--accent); border-color: var(--accent); }
+        .tracking-step .step-dot.inactive { opacity: 0.4; }
+        .tracking-step .step-line {
+            position: absolute; left: 5px; top: 22px; width: 2px; height: 16px; background: var(--border);
+        }
+        .tracking-step:last-child .step-line { display: none; }
+        .tracking-step .step-label { font-size: 13px; }
+        .tracking-step .step-label .step-date { font-size: 11px; color: var(--ink-2); display: block; }
+
+        .order-card .order-footer {
+            padding: 10px 16px; background: #fafbfc;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+        }
+        .order-card .order-footer .total { font-weight: 700; font-size: 16px; }
+        .order-card .order-footer .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .btn-primary {
+            padding: 8px 18px; background: var(--accent); color: #fff; border: none;
+            border-radius: var(--radius-sm); font-weight: 600; font-size: 12px;
+            cursor: pointer; transition: opacity 0.2s; font-family: 'Inter', sans-serif;
+        }
+        .btn-primary:hover { opacity: 0.85; }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-secondary {
+            padding: 8px 18px; background: transparent; color: var(--ink);
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            font-weight: 500; font-size: 12px; cursor: pointer; transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-secondary:hover { border-color: var(--ink); background: #f4f6f8; }
+
+        .btn-danger {
+            padding: 8px 18px; background: var(--accent-2); color: #fff; border: none;
+            border-radius: var(--radius-sm); font-weight: 600; font-size: 12px;
+            cursor: pointer; transition: opacity 0.2s; font-family: 'Inter', sans-serif;
+        }
+        .btn-danger:hover { opacity: 0.85; }
+        .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-whatsapp {
+            padding: 8px 18px; background: #25D366; color: #fff; border: none;
+            border-radius: var(--radius-sm); font-weight: 600; font-size: 12px;
+            cursor: pointer; transition: opacity 0.2s; font-family: 'Inter', sans-serif;
+        }
+        .btn-whatsapp:hover { opacity: 0.85; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-2); }
+        .empty-state .emoji { font-size: 48px; display: block; margin-bottom: 12px; }
+        .empty-state h2 { color: var(--ink); font-size: 22px; margin-bottom: 4px; }
+        .empty-state p { font-size: 14px; margin-bottom: 16px; }
+
+        #toastContainer {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999;
+            width: 92%; max-width: 400px; display: flex; flex-direction: column; gap: 8px; align-items: center;
+            pointer-events: none;
+        }
+        .toast {
+            background: #1e2226; color: #fff; padding: 12px 18px; border-radius: 12px;
+            text-align: center; font-size: 13px; font-weight: 500; width: 100%;
+            pointer-events: auto; animation: slideUp 0.3s ease;
+        }
+        .toast.success { background: #0b2e1a; }
+        .toast.error { background: #7a1a1a; }
+        .toast.warning { background: #6b4f00; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(14px); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; padding: 6px 0 10px; z-index: 99;
+        }
+        .bottom-nav .nav-item {
+            display: flex; flex-direction: column; align-items: center; font-size: 9px;
+            color: var(--ink-2); transition: color 0.2s; cursor: pointer; gap: 1px;
+            background: none; border: none; font-family: 'Inter', sans-serif;
+            position: relative; text-decoration: none; padding: 2px 6px;
+        }
+        .bottom-nav .nav-item .icon { font-size: 20px; }
+        .bottom-nav .nav-item.active { color: var(--accent); }
+        .bottom-nav .nav-item .badge {
+            position: absolute; top: -2px; right: -4px; background: var(--accent-2); color: #fff;
+            font-size: 7px; font-weight: 700; min-width: 12px; height: 12px;
+            border-radius: 50%; display: none; align-items: center; justify-content: center; padding: 0 2px;
+        }
+        .bottom-nav .nav-item .badge.show { display: flex; }
+        @media (min-width: 768px) { .bottom-nav { display: none !important; } }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <nav class="top-nav">
+        <div class="logo">🦁 <span>Simha</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop-listing.html">Shops</a></li>
+            <li><a href="categories.html">Categories</a></li>
+            <li><a href="orders.html" class="active">Orders</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button class="notif-btn" onclick="window.location.href='notifications.html'">
+                🔔 <span class="badge" id="notifBadge">0</span>
+            </button>
+            <div class="profile-btn" id="profileAvatarNav" onclick="window.location.href='profile.html'">👤</div>
+        </div>
+    </nav>
+
+    <header class="header">
+        <div class="header-top">
+            <div class="brand"><h1>🦁 <span>Simha</span> <span class="tag">Nepal</span></h1></div>
+            <div class="actions">
+                <button onclick="window.location.href='notifications.html'">
+                    🔔 <span class="badge" id="notifBadgeMobile">0</span>
+                </button>
+                <button onclick="window.location.href='profile.html'">👤</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <h1>📋 My Orders</h1>
+        <span class="count-badge" id="totalOrdersBadge">0</span>
+    </div>
+
+    <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all" onclick="applyFilter('all')">
+            All <span class="count" id="countAll">0</span>
+        </button>
+        <button class="filter-tab" data-filter="pending" onclick="applyFilter('pending')">
+            Pending <span class="count" id="countPending">0</span>
+        </button>
+        <button class="filter-tab" data-filter="confirmed" onclick="applyFilter('confirmed')">
+            Confirmed <span class="count" id="countConfirmed">0</span>
+        </button>
+        <button class="filter-tab" data-filter="shipped" onclick="applyFilter('shipped')">
+            Shipped <span class="count" id="countShipped">0</span>
+        </button>
+        <button class="filter-tab" data-filter="delivered" onclick="applyFilter('delivered')">
+            Delivered <span class="count" id="countDelivered">0</span>
+        </button>
+        <button class="filter-tab" data-filter="cancelled" onclick="applyFilter('cancelled')">
+            Cancelled <span class="count" id="countCancelled">0</span>
+        </button>
+    </div>
+
+    <div id="ordersList">
+        <div class="empty-state">
+            <span class="emoji">📋</span>
+            <h2>No orders yet</h2>
+            <p>Start shopping and place your first order!</p>
+            <button class="btn-primary" onclick="window.location.href='shop-listing.html'">Browse Shops →</button>
+        </div>
+    </div>
+
+    <div style="text-align:center;padding:16px 0 24px;">
+        <button class="btn-primary" id="loadMoreBtn" onclick="loadMore()" style="display:none;">Load More</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <a class="nav-item" href="index.html"><span class="icon">🏠</span>Home</a>
+        <a class="nav-item" href="shop-listing.html"><span class="icon">🏪</span>Shops</a>
+        <a class="nav-item" href="cart.html">
+            <span class="icon">🛒</span>Cart
+            <span class="badge" id="cartBadge">0</span>
+        </a>
+        <a class="nav-item active" href="orders.html"><span class="icon">📋</span>Orders</a>
+        <a class="nav-item" href="profile.html"><span class="icon">👤</span>Profile</a>
+    </nav>
+
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="importmap">
+{
+    "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+    }
+}
+</script>
+
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getAuth, onAuthStateChanged } from 'firebase/auth';
+    import {
+        getFirestore, collection, doc, getDocs, getDoc, updateDoc, setDoc,
+        query, where, onSnapshot, serverTimestamp, runTransaction
+    } from 'firebase/firestore';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDJLnUB8XnXWPEtSRAMuQr9ASmD16HLIJc",
+        authDomain: "bishalshrestha17-de676.firebaseapp.com",
+        projectId: "bishalshrestha17-de676",
+        storageBucket: "bishalshrestha17-de676.firebasestorage.app",
+        messagingSenderId: "631628771230",
+        appId: "1:631628771230:web:389c6430535f6a46b6708f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let allOrders = [];
+    let allOrdersData = [];
+    let currentFilter = 'all';
+    let isLoading = false;
+    const PAGE_SIZE = 10;
+
+    const ordersList = document.getElementById('ordersList');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.transition = 'opacity 0.3s, transform 0.3s';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(10px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 2800);
+    }
+    window.showToast = showToast;
+
+    function formatDate(timestamp) {
+        if (!timestamp) return 'N/A';
+        let date;
+        if (timestamp.toDate) date = timestamp.toDate();
+        else if (timestamp.seconds) date = new Date(timestamp.seconds * 1000);
+        else date = new Date(timestamp);
+        if (isNaN(date.getTime())) return 'N/A';
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getTrackingSteps(status, createdAt, deliveredAt) {
+        const steps = [
+            { label: 'Order Placed', key: 'placed', date: createdAt },
+            { label: 'Confirmed', key: 'confirmed', date: status !== 'pending' && status !== 'cancelled' ? createdAt : null },
+            { label: 'Shipped', key: 'shipped', date: status === 'shipped' || status === 'delivered' ? createdAt : null },
+            { label: 'Delivered', key: 'delivered', date: deliveredAt || null }
+        ];
+
+        const statusMap = { pending: 0, confirmed: 1, shipped: 2, delivered: 3, cancelled: -1 };
+        const idx = statusMap[status] ?? 0;
+        
+        if (status === 'cancelled') {
+            steps.forEach(s => s.status = 'inactive');
+            steps[0].status = 'completed';
+        } else {
+            steps.forEach((step, i) => {
+                if (i <= idx) step.status = 'completed';
+                else if (i === idx + 1) step.status = 'active';
+                else step.status = 'inactive';
+            });
+        }
+
+        return steps.map((step, index) => `
+            <div class="tracking-step">
+                <div class="step-dot ${step.status || 'inactive'}"></div>
+                ${index < steps.length - 1 ? '<div class="step-line"></div>' : ''}
+                <div class="step-label">
+                    ${step.label}
+                    ${step.date ? `<span class="step-date">${formatDate(step.date)}</span>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ── CANCEL ORDER ──
+    window.cancelOrder = async function(orderId) {
+        if (!confirm('⚠️ Are you sure you want to cancel this order?')) return;
+        
+        const order = allOrders.find(o => o.id === orderId);
+        if (!order) { showToast('Order not found', 'error'); return; }
+        
+        if (order.status === 'cancelled') {
+            showToast('Order already cancelled', 'warning');
+            return;
+        }
+        if (order.status === 'delivered') {
+            showToast('Cannot cancel delivered order', 'error');
+            return;
+        }
+
+        const btn = document.querySelector(`[data-cancel="${orderId}"]`);
+        if (btn) { btn.disabled = true; btn.textContent = 'Cancelling...'; }
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                // 1. READ - Get order first
+                const orderRef = doc(db, 'orders', orderId);
+                const orderDoc = await transaction.get(orderRef);
+                if (!orderDoc.exists()) throw new Error('Order not found');
+                const orderData = orderDoc.data();
+                if (orderData.status === 'cancelled') throw new Error('Already cancelled');
+                if (orderData.status === 'delivered') throw new Error('Cannot cancel delivered order');
+
+                // 2. READ - Get all product documents first (all reads before writes)
+                const productRefs = [];
+                const productItems = [];
+                if (orderData.items) {
+                    for (const item of orderData.items) {
+                        const productRef = doc(db, 'products', item.productId);
+                        productRefs.push(productRef);
+                        productItems.push(item);
+                    }
+                }
+
+                // 3. READ - Get all product data
+                const productDocs = [];
+                for (const ref of productRefs) {
+                    const docSnap = await transaction.get(ref);
+                    productDocs.push({ ref, data: docSnap.exists() ? docSnap.data() : null });
+                }
+
+                // 4. WRITE - Update order status (all writes after all reads)
+                transaction.update(orderRef, {
+                    status: 'cancelled',
+                    cancelledAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+
+                // 5. WRITE - Restore stock for each item
+                for (let i = 0; i < productDocs.length; i++) {
+                    const { ref, data } = productDocs[i];
+                    if (data) {
+                        const currentStock = data.stock || 0;
+                        const qtyToAdd = productItems[i]?.qty || 0;
+                        transaction.update(ref, {
+                            stock: currentStock + qtyToAdd,
+                            updatedAt: serverTimestamp()
+                        });
+                    }
+                }
+            });
+
+            showToast('✅ Order cancelled successfully! Stock restored.', 'success');
+            await loadOrders();
+        } catch (error) {
+            console.error('Error cancelling order:', error);
+            showToast('Failed to cancel order: ' + error.message, 'error');
+            if (btn) { btn.disabled = false; btn.textContent = '❌ Cancel Order'; }
+        }
+    };
+
+    function renderOrders(orders) {
+        if (orders.length === 0) {
+            ordersList.innerHTML = `
+                <div class="empty-state">
+                    <span class="emoji">📋</span>
+                    <h2>No orders found</h2>
+                    <p>${currentFilter === 'all' ? 'Start shopping and place your first order!' : `No ${currentFilter} orders`}</p>
+                    <button class="btn-primary" onclick="window.location.href='shop-listing.html'">Browse Shops →</button>
+                </div>
+            `;
+            return;
+        }
+
+        ordersList.innerHTML = orders.map(order => {
+            const canCancel = order.status !== 'cancelled' && order.status !== 'delivered';
+            return `
+            <div class="order-card">
+                <div class="order-header" onclick="toggleOrder('${order.id}')">
+                    <div>
+                        <div class="order-id">${order.orderId || '#' + order.id.slice(0, 8)}</div>
+                        <div class="order-date">${formatDate(order.createdAt)}</div>
+                    </div>
+                    <div>
+                        <span class="order-status ${order.status || 'pending'}">${(order.status || 'Pending')}</span>
+                    </div>
+                </div>
+                <div class="order-body" id="orderBody_${order.id}">
+                    <div class="order-shop">🏪 ${order.shopName || 'Shop'}</div>
+                    ${order.items ? order.items.map(item => `
+                        <div class="order-item">
+                            <img src="${item.imageURL || 'https://picsum.photos/40/40'}" alt="${item.productName}" onerror="this.src='https://picsum.photos/40/40'">
+                            <div class="item-details">
+                                <div class="name">${item.productName || 'Product'}</div>
+                                <div class="qty">×${item.qty || 0} ${item.unit || ''}</div>
+                            </div>
+                            <div class="item-price">Rs. ${((item.price || 0) * (item.qty || 0)).toLocaleString()}</div>
+                        </div>
+                    `).join('') : '<div style="padding:8px 0;color:var(--ink-2);">No items</div>'}
+                    <div class="tracking-stepper">
+                        ${getTrackingSteps(order.status, order.createdAt, order.deliveredAt)}
+                    </div>
+                    ${order.cancelledAt ? `<div style="margin-top:8px;padding:8px;background:#fee2e2;border-radius:6px;font-size:12px;color:#991b1b;">
+                        Cancelled on: ${formatDate(order.cancelledAt)}
+                    </div>` : ''}
+                </div>
+                <div class="order-footer">
+                    <span class="total">Total: Rs. ${(order.totalAmount || 0).toLocaleString()}</span>
+                    <div class="actions">
+                        ${canCancel ? `
+                            <button class="btn-danger" data-cancel="${order.id}" onclick="cancelOrder('${order.id}')">❌ Cancel</button>
+                        ` : ''}
+                        ${order.status === 'pending' || order.status === 'cancelled' ? `
+                            <button class="btn-secondary" onclick="reorder('${order.id}')">🔄 Reorder</button>
+                        ` : ''}
+                        ${order.shopWhatsapp ? `
+                            <button class="btn-whatsapp" onclick="contactShop('${order.shopWhatsapp}', '${order.orderId || order.id}')">💬 Contact</button>
+                        ` : ''}
+                        <button class="btn-secondary" onclick="toggleOrder('${order.id}')">📄 Details</button>
+                    </div>
+                </div>
+            </div>
+        `}).join('');
+    }
+
+    window.toggleOrder = function(orderId) {
+        const body = document.getElementById(`orderBody_${orderId}`);
+        if (body) body.classList.toggle('expanded');
+    };
+
+    window.reorder = async function(orderId) {
+        const order = allOrders.find(o => o.id === orderId);
+        if (!order || !order.items) {
+            showToast('No items to reorder', 'error');
+            return;
+        }
+        const user = auth.currentUser;
+        if (!user) { showToast('Please login', 'error'); return; }
+
+        try {
+            const cartRef = doc(db, 'cart', user.uid);
+            const cartSnap = await getDoc(cartRef);
+            let existingItems = [];
+            if (cartSnap.exists()) {
+                existingItems = cartSnap.data().items || [];
+            }
+
+            const newItems = [...existingItems];
+            for (const item of order.items) {
+                const existingIndex = newItems.findIndex(i => i.productId === item.productId);
+                if (existingIndex >= 0) {
+                    newItems[existingIndex].qty += item.qty || 0;
+                } else {
+                    newItems.push({
+                        productId: item.productId,
+                        shopId: order.shopId,
+                        shopName: order.shopName || 'Shop',
+                        productName: item.productName,
+                        price: item.price,
+                        qty: item.qty || 0,
+                        unit: item.unit || '',
+                        imageURL: item.imageURL || ''
+                    });
+                }
+            }
+
+            if (cartSnap.exists()) {
+                await updateDoc(cartRef, { items: newItems, updatedAt: serverTimestamp() });
+            } else {
+                await setDoc(cartRef, { items: newItems, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+            }
+            showToast('Items added to cart! 🛒', 'success');
+            window.location.href = 'cart.html';
+        } catch (error) {
+            console.error('Error reordering:', error);
+            showToast('Failed to reorder', 'error');
+        }
+    };
+
+    window.contactShop = function(whatsapp, orderId) {
+        const message = `Hi, I have an order (${orderId}) on Simha. Can you help me with it?`;
+        const url = `https://wa.me/977${whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    };
+
+    window.applyFilter = function(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.filter === filter);
+        });
+
+        const filtered = filter === 'all' ? allOrders : allOrders.filter(o => o.status === filter);
+        renderOrders(filtered);
+    };
+
+    async function loadOrders() {
+        const user = auth.currentUser;
+        if (!user) { window.location.href = 'auth.html'; return; }
+
+        try {
+            isLoading = true;
+            loadMoreBtn.style.display = 'none';
+
+            const q = query(
+                collection(db, 'orders'),
+                where('customerId', '==', user.uid)
+            );
+
+            const snapshot = await getDocs(q);
+            const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            orders.sort((a, b) => {
+                const da = a.createdAt?.toDate?.() || new Date(0);
+                const db_ = b.createdAt?.toDate?.() || new Date(0);
+                return db_ - da;
+            });
+
+            allOrdersData = orders;
+            allOrders = orders.slice(0, PAGE_SIZE);
+            applyFilter(currentFilter);
+            updateCounts();
+
+            if (orders.length > PAGE_SIZE) {
+                loadMoreBtn.style.display = 'inline-block';
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.textContent = 'Load More';
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+
+            isLoading = false;
+            setupRealtimeListener();
+        } catch (error) {
+            console.error('Error loading orders:', error);
+            showToast('Failed to load orders', 'error');
+            isLoading = false;
+        }
+    }
+
+    function setupRealtimeListener() {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const q = query(
+            collection(db, 'orders'),
+            where('customerId', '==', user.uid)
+        );
+
+        onSnapshot(q, (snapshot) => {
+            const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            orders.sort((a, b) => {
+                const da = a.createdAt?.toDate?.() || new Date(0);
+                const db_ = b.createdAt?.toDate?.() || new Date(0);
+                return db_ - da;
+            });
+            
+            allOrdersData = orders;
+            allOrders = orders.slice(0, PAGE_SIZE);
+            applyFilter(currentFilter);
+            updateCounts();
+
+            if (orders.length > PAGE_SIZE) {
+                loadMoreBtn.style.display = 'inline-block';
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.textContent = 'Load More';
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+        }, (error) => {
+            console.error('Orders listener error:', error);
+        });
+    }
+
+    window.loadMore = function() {
+        if (isLoading) return;
+        
+        const currentCount = allOrders.length;
+        const totalCount = allOrdersData.length;
+        
+        if (currentCount >= totalCount) {
+            loadMoreBtn.style.display = 'none';
+            return;
+        }
+
+        const nextBatch = allOrdersData.slice(currentCount, currentCount + PAGE_SIZE);
+        allOrders = [...allOrders, ...nextBatch];
+        applyFilter(currentFilter);
+        updateCounts();
+
+        if (allOrders.length >= totalCount) {
+            loadMoreBtn.style.display = 'none';
+        }
+    };
+
+    function updateCounts() {
+        const total = allOrdersData.length;
+        document.getElementById('totalOrdersBadge').textContent = total;
+        document.getElementById('countAll').textContent = total;
+
+        const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+        statuses.forEach(status => {
+            const count = allOrdersData.filter(o => o.status === status).length;
+            const el = document.getElementById(`count${status.charAt(0).toUpperCase() + status.slice(1)}`);
+            if (el) el.textContent = count;
+        });
+    }
+
+    async function updateBadges() {
+        const user = auth.currentUser;
+        if (!user) return;
+        try {
+            const cartDoc = await getDoc(doc(db, 'cart', user.uid));
+            const cartCount = cartDoc.exists() ? (cartDoc.data().items || []).reduce((s, i) => s + (i.qty || 0), 0) : 0;
+            document.getElementById('cartBadge').textContent = cartCount > 99 ? '99+' : cartCount;
+            document.getElementById('cartBadge').classList.toggle('show', cartCount > 0);
+
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                const read = userDoc.data().readNotifications || [];
+                const notifSnap = await getDocs(query(collection(db, 'notifications'), where('isActive', '==', true)));
+                const unread = notifSnap.size - read.length;
+                [document.getElementById('notifBadge'), document.getElementById('notifBadgeMobile')].forEach(el => {
+                    if (el) { el.textContent = unread > 99 ? '99+' : unread; el.classList.toggle('show', unread > 0); }
+                });
+            }
+        } catch (e) { console.warn('Badge update error:', e); }
+    }
+
+    function updateProfileAvatar(user) {
+        const avatar = document.getElementById('profileAvatarNav');
+        if (!avatar) return;
+        if (user) {
+            const name = user.displayName || user.email || 'User';
+            avatar.textContent = name.charAt(0).toUpperCase();
+            if (user.photoURL) {
+                avatar.innerHTML = `<img src="${user.photoURL}" alt="${name}">`;
+            }
+        } else {
+            avatar.textContent = '👤';
+            avatar.innerHTML = '👤';
+        }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+        updateProfileAvatar(user);
+        if (user) {
+            await loadOrders();
+            await updateBadges();
+        } else {
+            window.location.href = 'auth.html';
+        }
+    });
+
+    window.applyFilter = window.applyFilter;
+    window.loadMore = window.loadMore;
+    window.toggleOrder = window.toggleOrder;
+    window.reorder = window.reorder;
+    window.contactShop = window.contactShop;
+    window.cancelOrder = window.cancelOrder;
+    window.showToast = showToast;
+
+    console.log('🚀 Orders Page loaded with cancel & stock restore');
+</script>
+</body>
+</html>

@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <meta name="theme-color" content="#ffffff">
+    <title>Admin Panel - Simha</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f5f5f5; color: #000; min-height: 100vh; padding-bottom: 80px; }
+        button { cursor: pointer; font-family: inherit; border: none; background: none; font-size: inherit; }
+        .navbar {
+            position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 2px solid #000;
+            padding: 0 16px; height: 64px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .navbar .logo { font-size: 20px; font-weight: 800; color: #000; display: flex; align-items: center; gap: 8px; }
+        .navbar .logo .badge { font-size: 10px; background: #000; color: #fff; padding: 2px 10px; border-radius: 50px; font-weight: 600; }
+        .navbar .nav-actions { display: flex; align-items: center; gap: 12px; }
+        .navbar .nav-actions .back-btn { font-size: 20px; cursor: pointer; padding: 4px; }
+        .navbar .nav-actions .profile-avatar { width: 36px; height: 36px; border-radius: 50%; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; border: 2px solid #e0e0e0; }
+        .admin-tabs {
+            display: flex; gap: 4px; overflow-x: auto; padding: 12px 0; scrollbar-width: none; border-bottom: 1px solid #e0e0e0; margin-bottom: 16px;
+        }
+        .admin-tabs::-webkit-scrollbar { display: none; }
+        .admin-tab {
+            flex-shrink: 0; padding: 8px 18px; border-radius: 50px; font-size: 13px; font-weight: 500;
+            color: #666; border: 1px solid transparent; transition: all 0.2s; background: none;
+        }
+        .admin-tab.active { color: #fff; background: #000; border-color: #000; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px;
+        }
+        .stat-card { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 16px; text-align: center; }
+        .stat-card .number { font-size: 28px; font-weight: 800; }
+        .stat-card .label { font-size: 13px; color: #888; margin-top: 2px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px;
+            font-family: 'Inter', sans-serif; background: #fff; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #000; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .file-input-wrapper { position: relative; overflow: hidden; }
+        .file-input-wrapper input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .file-input-wrapper .file-label {
+            display: block; padding: 10px 14px; border: 1px dashed #d0d0d0; border-radius: 8px;
+            text-align: center; color: #888; font-size: 13px; cursor: pointer; transition: all 0.2s;
+        }
+        .file-input-wrapper .file-label:hover { border-color: #000; }
+        .file-preview { margin-top: 8px; max-height: 150px; border-radius: 8px; overflow: hidden; display: none; }
+        .file-preview.show { display: block; }
+        .file-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-primary { padding: 10px 24px; background: #000; color: #fff; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; transition: opacity 0.2s; }
+        .btn-primary:hover:not(:disabled) { opacity: 0.8; }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-danger { padding: 6px 14px; background: #cc0000; color: #fff; border-radius: 6px; font-weight: 500; font-size: 12px; transition: opacity 0.2s; }
+        .btn-danger:hover { opacity: 0.8; }
+        .btn-secondary { padding: 6px 14px; background: transparent; color: #000; border: 1px solid #d0d0d0; border-radius: 6px; font-weight: 500; font-size: 12px; transition: all 0.2s; }
+        .btn-secondary:hover { border-color: #000; background: #f5f5f5; }
+        .table-container { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; overflow: auto; padding: 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table th { text-align: left; padding: 8px 12px; font-weight: 600; color: #666; border-bottom: 2px solid #e0e0e0; }
+        table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+        .shop-logo-sm { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #f0f0f0; }
+        .product-img { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; background: #f0f0f0; }
+        .banner-preview-card {
+            background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 16px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+        }
+        .banner-preview-card .preview-img { width: 120px; height: 70px; border-radius: 8px; object-fit: cover; background: #f0f0f0; }
+        .banner-preview-card .info { flex: 1; min-width: 160px; }
+        .banner-preview-card .info .title { font-weight: 600; font-size: 14px; }
+        .banner-preview-card .info .subtitle { font-size: 12px; color: #888; }
+        .toast-container {
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 9999;
+            width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none;
+        }
+        .toast { background: #000; color: #fff; padding: 14px 20px; border-radius: 8px; text-align: center; font-size: 14px; width: 100%; pointer-events: auto; animation: slideUp 0.3s ease; }
+        .toast.success { background: #000; }
+        .toast.error { background: #cc0000; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: #fff; border-radius: 16px; padding: 32px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; border: 1px solid #e0e0e0; }
+        .modal-box .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-box .modal-header h2 { font-size: 20px; font-weight: 700; }
+        .modal-box .modal-close { font-size: 24px; cursor: pointer; color: #888; }
+        .modal-box .modal-close:hover { color: #000; }
+        .search-box { margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .search-box input { flex: 1; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; min-width: 200px; }
+        .search-box input:focus { outline: none; border-color: #000; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #888; }
+        .empty-state .emoji { font-size: 48px; display: block; margin-bottom: 12px; }
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .banner-preview-card { flex-direction: column; align-items: stretch; }
+            .banner-preview-card .preview-img { width: 100%; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><span>🦁</span> Simha <span class="badge">ADMIN</span></div>
+        <div class="nav-actions">
+            <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+            <div class="profile-avatar" id="profileAvatar" onclick="window.location.href='profile.html'">👤</div>
+        </div>
+    </nav>
+
+    <main class="container" style="max-width:1200px;margin:0 auto;padding:0 16px;">
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="admin-tab" data-tab="create-shop" onclick="switchTab('create-shop')">🏪 Create Shop</button>
+            <button class="admin-tab" data-tab="shops" onclick="switchTab('shops')">📋 All Shops</button>
+            <button class="admin-tab" data-tab="products" onclick="switchTab('products')">📦 Products</button>
+            <button class="admin-tab" data-tab="add-product" onclick="switchTab('add-product')">➕ Add Product</button>
+            <button class="admin-tab" data-tab="users" onclick="switchTab('users')">👥 Users</button>
+            <button class="admin-tab" data-tab="banners" onclick="switchTab('banners')">🖼️ Banners</button>
+            <button class="admin-tab" data-tab="notifications" onclick="switchTab('notifications')">📨 Notifications</button>
+            <button class="admin-tab" data-tab="settings" onclick="switchTab('settings')">⚙️ Settings</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="tab-content active" id="tabDashboard">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="number" id="statShops">0</div><div class="label">Total Shops</div></div>
+                <div class="stat-card"><div class="number" id="statProducts">0</div><div class="label">Total Products</div></div>
+                <div class="stat-card"><div class="number" id="statUsers">0</div><div class="label">Total Users</div></div>
+                <div class="stat-card"><div class="number" id="statOrders">0</div><div class="label">Total Orders</div></div>
+                <div class="stat-card"><div class="number" id="statBanners">0</div><div class="label">Total Banners</div></div>
+            </div>
+            <div style="background:#fff;border-radius:12px;border:1px solid #e0e0e0;padding:20px;text-align:center;">
+                <h3>Welcome to Admin Panel</h3>
+                <p style="color:#888;font-size:14px;">Manage everything. Commission is set in Rs (fixed amount).</p>
+            </div>
+        </div>
+
+        <!-- Create Shop -->
+        <div class="tab-content" id="tabCreateShop">
+            <h2 style="margin-bottom:16px;">Create New Shop</h2>
+            <form id="createShopForm" style="max-width:600px;">
+                <div class="form-group"><label>Shop Name *</label><input type="text" id="shopName" placeholder="e.g. Fresh Mart Dhading" required></div>
+                <div class="form-group"><label>Owner Name *</label><input type="text" id="ownerName" placeholder="e.g. Ram Sharma" required></div>
+                <div class="form-group"><label>Owner Email *</label><input type="email" id="ownerEmail" placeholder="owner@email.com" required></div>
+                <div class="form-group"><label>Contact Number *</label><input type="tel" id="shopPhone" placeholder="9841234567" required></div>
+                <div class="form-group"><label>WhatsApp Number</label><input type="tel" id="shopWhatsapp" placeholder="9841234567"></div>
+                <div class="form-group"><label>PAN Number</label><input type="text" id="shopPan" placeholder="123456789"></div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select id="shopCategory" required>
+                        <option value="">Select</option>
+                        <option value="Grocery Stores">🛒 Grocery</option>
+                        <option value="Mobile Shops">📱 Mobile</option>
+                        <option value="Clothing Stores">👕 Clothing</option>
+                        <option value="Electronics Shops">💻 Electronics</option>
+                        <option value="Restaurants & Food">🍽️ Food</option>
+                        <option value="Hardware Stores">🔧 Hardware</option>
+                        <option value="Pharmacy">💊 Pharmacy</option>
+                        <option value="Agriculture Stores">🌱 Agriculture</option>
+                        <option value="Beauty & Saloon">💄 Beauty</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>District *</label>
+                    <select id="shopDistrict" required>
+                        <option value="">Select District</option>
+                        <option value="Kathmandu">Kathmandu</option><option value="Lalitpur">Lalitpur</option>
+                        <option value="Bhaktapur">Bhaktapur</option><option value="Dhading">Dhading</option>
+                        <option value="Chitwan">Chitwan</option><option value="Pokhara">Pokhara</option>
+                        <option value="Butwal">Butwal</option><option value="Biratnagar">Biratnagar</option>
+                        <option value="Birgunj">Birgunj</option><option value="Nepalgunj">Nepalgunj</option>
+                        <option value="Dhangadhi">Dhangadhi</option><option value="Ilam">Ilam</option>
+                        <option value="Jhapa">Jhapa</option><option value="Morang">Morang</option>
+                        <option value="Sunsari">Sunsari</option><option value="Kaski">Kaski</option>
+                        <option value="Tanahu">Tanahu</option><option value="Syangja">Syangja</option>
+                        <option value="Gorkha">Gorkha</option><option value="Nuwakot">Nuwakot</option>
+                        <option value="Rasuwa">Rasuwa</option><option value="Sindhupalchok">Sindhupalchok</option>
+                        <option value="Kavrepalanchok">Kavrepalanchok</option><option value="Dolakha">Dolakha</option>
+                        <option value="Ramechhap">Ramechhap</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Address / Tole *</label><input type="text" id="shopAddress" placeholder="e.g. Dhading Besi" required></div>
+                <div class="form-group"><label>Shop Description</label><textarea id="shopDescription" placeholder="Describe your shop..."></textarea></div>
+                <div class="form-group"><label>Delivery Time</label><input type="text" id="shopDelivery" placeholder="e.g. 1-2 days"></div>
+                <div class="form-group"><label>Opening Time</label><input type="text" id="shopOpenTime" placeholder="e.g. 9:00 AM"></div>
+                <div class="form-group"><label>Closing Time</label><input type="text" id="shopCloseTime" placeholder="e.g. 9:00 PM"></div>
+                <div class="form-group">
+                    <label>Shop Cover Photo</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="shopPhoto" accept="image/*" onchange="previewImage(this, 'shopPhotoPreview')">
+                        <div class="file-label">📸 Click to upload cover photo</div>
+                    </div>
+                    <div class="file-preview" id="shopPhotoPreview"><img src="" alt="Preview"></div>
+                </div>
+                <div class="form-group">
+                    <label>Shop Logo</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="shopLogo" accept="image/*" onchange="previewImage(this, 'shopLogoPreview')">
+                        <div class="file-label">🖼️ Click to upload logo</div>
+                    </div>
+                    <div class="file-preview" id="shopLogoPreview"><img src="" alt="Preview"></div>
+                </div>
+                <!-- Fixed commission in Rs -->
+                <div class="form-group"><label>Commission (Rs. fixed) *</label><input type="number" id="shopCommission" placeholder="e.g. 50" value="50" min="0" required></div>
+                <button type="submit" class="btn-primary" id="createShopBtn">🏪 Create Shop</button>
+            </form>
+        </div>
+
+        <!-- All Shops -->
+        <div class="tab-content" id="tabShops">
+            <h2 style="margin-bottom:12px;">All Shops</h2>
+            <div class="search-box"><input type="text" id="shopSearchInput" placeholder="🔍 Search shops..." onkeyup="filterShops(this.value)"></div>
+            <div class="table-container" id="shopsTableContainer"><div class="empty-state"><span class="emoji">🏪</span><h3>No shops yet</h3></div></div>
+        </div>
+
+        <!-- Products -->
+        <div class="tab-content" id="tabProducts">
+            <h2 style="margin-bottom:12px;">All Products</h2>
+            <div class="search-box"><input type="text" id="productSearchInput" placeholder="🔍 Search products..." onkeyup="filterProducts(this.value)"></div>
+            <div class="table-container" id="productsTableContainer"><div class="empty-state"><span class="emoji">📦</span><h3>No products yet</h3></div></div>
+        </div>
+
+        <!-- Add Product -->
+        <div class="tab-content" id="tabAddProduct">
+            <h2 style="margin-bottom:16px;">Add New Product</h2>
+            <form id="addProductForm" style="max-width:600px;">
+                <div class="form-group"><label>Product Name *</label><input type="text" id="prodName" placeholder="e.g. Jeera Masino Rice" required></div>
+                <div class="form-group"><label>Description</label><textarea id="prodDescription"></textarea></div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select id="prodCategory" required>
+                        <option value="">Select</option>
+                        <option value="Grocery">🛒 Grocery</option><option value="Mobile">📱 Mobile</option>
+                        <option value="Fashion">👕 Fashion</option><option value="Electronics">💻 Electronics</option>
+                        <option value="Food">🍽️ Food</option><option value="Hardware">🔧 Hardware</option>
+                        <option value="Pharmacy">💊 Pharmacy</option><option value="Agriculture">🌱 Agriculture</option>
+                        <option value="Beauty">💄 Beauty</option><option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Price (Rs.) *</label><input type="number" id="prodPrice" placeholder="650" required min="0"></div>
+                <div class="form-group"><label>Unit</label><input type="text" id="prodUnit" placeholder="e.g. 5kg"></div>
+                <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" placeholder="50" required min="0"></div>
+                <div class="form-group"><label>Discount Price</label><input type="number" id="prodDiscountPrice" placeholder="500" min="0"></div>
+                <div class="form-group"><label>On Sale</label><select id="prodOnSale"><option value="false">No</option><option value="true">Yes</option></select></div>
+                <div class="form-group">
+                    <label>Shop *</label>
+                    <select id="prodShopId" required><option value="">Select Shop</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="prodImage" accept="image/*" onchange="previewImage(this, 'prodImagePreview')">
+                        <div class="file-label">📸 Click to upload</div>
+                    </div>
+                    <div class="file-preview" id="prodImagePreview"><img src="" alt="Preview"></div>
+                </div>
+                <div class="form-group"><label><input type="checkbox" id="prodActive" checked> Active</label></div>
+                <button type="submit" class="btn-primary" id="addProductBtn">➕ Add Product</button>
+            </form>
+        </div>
+
+        <!-- Users -->
+        <div class="tab-content" id="tabUsers">
+            <h2 style="margin-bottom:12px;">All Users</h2>
+            <div class="search-box"><input type="text" id="userSearchInput" placeholder="🔍 Search users..." onkeyup="filterUsers(this.value)"></div>
+            <div class="table-container" id="usersTableContainer"><div class="empty-state"><span class="emoji">👥</span><h3>No users yet</h3></div></div>
+        </div>
+
+        <!-- Banners -->
+        <div class="tab-content" id="tabBanners">
+            <h2 style="margin-bottom:16px;">🖼️ Banners</h2>
+            <form id="addBannerForm" style="max-width:600px;background:#f8f8f8;padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid #e0e0e0;">
+                <h3 style="margin-bottom:12px;font-size:16px;">Add New Banner</h3>
+                <div class="form-group">
+                    <label>Banner Image *</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="bannerImage" accept="image/*" onchange="previewImage(this, 'bannerImagePreview')">
+                        <div class="file-label">📸 Click to upload</div>
+                    </div>
+                    <div class="file-preview" id="bannerImagePreview"><img src="" alt="Preview"></div>
+                </div>
+                <div class="form-group"><label>Title</label><input type="text" id="bannerTitle" placeholder="e.g. Summer Sale!"></div>
+                <div class="form-group"><label>Subtitle</label><input type="text" id="bannerSubtitle" placeholder="e.g. Up to 50% off"></div>
+                <div class="form-group"><label>Link URL</label><input type="url" id="bannerLink" placeholder="https://simha.com"></div>
+                <div class="form-group"><label>Display Order</label><input type="number" id="bannerOrder" placeholder="1" value="1"></div>
+                <div class="form-group"><label><input type="checkbox" id="bannerActive" checked> Active</label></div>
+                <button type="submit" class="btn-primary" id="addBannerBtn">➕ Add Banner</button>
+            </form>
+            <h3>Current Banners</h3>
+            <div id="bannersListContainer"></div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="tab-content" id="tabNotifications">
+            <h2 style="margin-bottom:12px;">Send Notification</h2>
+            <form id="notifForm" style="max-width:600px;">
+                <div class="form-group"><label>Title *</label><input type="text" id="notifTitle" placeholder="Title" required></div>
+                <div class="form-group"><label>Message *</label><textarea id="notifBody" placeholder="Message" required></textarea></div>
+                <div class="form-group"><label>Target</label><select id="notifTarget"><option value="all">All Users</option><option value="customer">Customers</option><option value="shop">Shop Owners</option></select></div>
+                <div class="form-group"><label>Image URL</label><input type="url" id="notifImage" placeholder="https://i.ibb.co/xxx.jpg"></div>
+                <div class="form-group"><label>Deep Link</label><input type="text" id="notifLink" placeholder="/shop-detail.html?shopId=SIM001"></div>
+                <button type="submit" class="btn-primary" id="sendNotifBtn">📨 Send</button>
+            </form>
+            <div style="margin-top:20px;">
+                <h3>📧 Send Email to All Users</h3>
+                <form id="emailForm" style="max-width:600px;">
+                    <div class="form-group"><label>Subject *</label><input type="text" id="emailSubject" placeholder="Subject" required></div>
+                    <div class="form-group"><label>Body *</label><textarea id="emailBody" placeholder="Write your email..." required style="min-height:120px;"></textarea></div>
+                    <div class="form-group"><label>Target</label><select id="emailTarget"><option value="all">All Users</option><option value="customer">Customers</option><option value="shop">Shop Owners</option></select></div>
+                    <button type="submit" class="btn-primary" id="sendEmailBtn">📧 Send Email</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="tab-content" id="tabSettings">
+            <h2 style="margin-bottom:16px;">⚙️ Site Settings</h2>
+            <form id="settingsForm" style="max-width:600px;">
+                <div class="form-group"><label>Site Logo</label><div class="file-input-wrapper"><input type="file" id="siteLogoUpload" accept="image/*" onchange="previewImage(this, 'siteLogoPreview')"><div class="file-label">🖼️ Upload Logo</div></div><div class="file-preview" id="siteLogoPreview"><img src="" alt="Preview"></div></div>
+                <div class="form-group"><label>Site Name</label><input type="text" id="siteName" placeholder="Simha"></div>
+                <div class="form-group"><label>Advertisement Image (600×160)</label><div class="file-input-wrapper"><input type="file" id="adImageUpload" accept="image/*" onchange="previewImage(this, 'adImagePreview')"><div class="file-label">📢 Upload Ad</div></div><div class="file-preview" id="adImagePreview"><img src="" alt="Preview"></div></div>
+                <button type="submit" class="btn-primary">💾 Save Settings</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Edit Shop Modal -->
+    <div class="modal-overlay" id="editShopModal">
+        <div class="modal-box">
+            <div class="modal-header"><h2>Edit Shop</h2><span class="modal-close" onclick="closeShopModal()">✕</span></div>
+            <form id="editShopForm">
+                <input type="hidden" id="editShopId">
+                <div class="form-group"><label>Shop Name *</label><input type="text" id="editShopName" required></div>
+                <div class="form-group"><label>Owner Name *</label><input type="text" id="editShopOwner" required></div>
+                <div class="form-group"><label>Email *</label><input type="email" id="editShopEmail" required></div>
+                <div class="form-group"><label>Phone *</label><input type="tel" id="editShopPhone" required></div>
+                <div class="form-group"><label>WhatsApp</label><input type="tel" id="editShopWhatsapp"></div>
+                <div class="form-group"><label>PAN</label><input type="text" id="editShopPan"></div>
+                <div class="form-group"><label>Category *</label><select id="editShopCategory"><option value="Grocery Stores">🛒 Grocery</option><option value="Mobile Shops">📱 Mobile</option><option value="Clothing Stores">👕 Clothing</option><option value="Electronics Shops">💻 Electronics</option><option value="Restaurants & Food">🍽️ Food</option><option value="Hardware Stores">🔧 Hardware</option><option value="Pharmacy">💊 Pharmacy</option><option value="Agriculture Stores">🌱 Agriculture</option><option value="Beauty & Saloon">💄 Beauty</option><option value="Other">Other</option></select></div>
+                <div class="form-group"><label>District *</label><select id="editShopDistrict"><option value="Kathmandu">Kathmandu</option><option value="Lalitpur">Lalitpur</option><option value="Bhaktapur">Bhaktapur</option><option value="Dhading">Dhading</option><option value="Chitwan">Chitwan</option><option value="Pokhara">Pokhara</option><option value="Butwal">Butwal</option><option value="Biratnagar">Biratnagar</option><option value="Birgunj">Birgunj</option><option value="Nepalgunj">Nepalgunj</option><option value="Dhangadhi">Dhangadhi</option><option value="Ilam">Ilam</option><option value="Jhapa">Jhapa</option><option value="Morang">Morang</option><option value="Sunsari">Sunsari</option><option value="Kaski">Kaski</option><option value="Tanahu">Tanahu</option><option value="Syangja">Syangja</option><option value="Gorkha">Gorkha</option><option value="Nuwakot">Nuwakot</option><option value="Rasuwa">Rasuwa</option><option value="Sindhupalchok">Sindhupalchok</option><option value="Kavrepalanchok">Kavrepalanchok</option><option value="Dolakha">Dolakha</option><option value="Ramechhap">Ramechhap</option></select></div>
+                <div class="form-group"><label>Address *</label><input type="text" id="editShopAddress" required></div>
+                <div class="form-group"><label>Description</label><textarea id="editShopDescription"></textarea></div>
+                <div class="form-group"><label>Delivery Time</label><input type="text" id="editShopDelivery"></div>
+                <div class="form-group"><label>Opening Time</label><input type="text" id="editShopOpenTime"></div>
+                <div class="form-group"><label>Closing Time</label><input type="text" id="editShopCloseTime"></div>
+                <div class="form-group"><label>Commission (Rs.)</label><input type="number" id="editShopCommission" min="0"></div>
+                <div class="form-group"><label>Cover Photo</label><div class="file-input-wrapper"><input type="file" id="editShopPhoto" accept="image/*" onchange="previewImage(this, 'editShopPhotoPreview')"><div class="file-label">📸 Change</div></div><div class="file-preview" id="editShopPhotoPreview"><img src="" alt="Preview"></div></div>
+                <div class="form-group"><label>Logo</label><div class="file-input-wrapper"><input type="file" id="editShopLogo" accept="image/*" onchange="previewImage(this, 'editShopLogoPreview')"><div class="file-label">🖼️ Change</div></div><div class="file-preview" id="editShopLogoPreview"><img src="" alt="Preview"></div></div>
+                <div class="form-group"><label><input type="checkbox" id="editShopActive"> Active</label></div>
+                <div class="form-group"><label><input type="checkbox" id="editShopVerified"> Verified</label></div>
+                <div class="form-group"><label><input type="checkbox" id="editShopOpen"> Open Now</label></div>
+                <button type="submit" class="btn-primary">💾 Update Shop</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-box">
+            <div class="modal-header"><h2 id="modalTitle">Edit Product</h2><span class="modal-close" onclick="closeModal()">✕</span></div>
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId">
+                <div class="form-group"><label>Product Name *</label><input type="text" id="editProdName" required></div>
+                <div class="form-group"><label>Description</label><textarea id="editProdDescription"></textarea></div>
+                <div class="form-group"><label>Category *</label><select id="editProdCategory"><option value="Grocery">🛒 Grocery</option><option value="Mobile">📱 Mobile</option><option value="Fashion">👕 Fashion</option><option value="Electronics">💻 Electronics</option><option value="Food">🍽️ Food</option><option value="Hardware">🔧 Hardware</option><option value="Pharmacy">💊 Pharmacy</option><option value="Agriculture">🌱 Agriculture</option><option value="Beauty">💄 Beauty</option><option value="Other">Other</option></select></div>
+                <div class="form-group"><label>Price (Rs.) *</label><input type="number" id="editProdPrice" required min="0"></div>
+                <div class="form-group"><label>Unit</label><input type="text" id="editProdUnit"></div>
+                <div class="form-group"><label>Stock *</label><input type="number" id="editProdStock" required min="0"></div>
+                <div class="form-group"><label>Discount Price</label><input type="number" id="editProdDiscountPrice" min="0"></div>
+                <div class="form-group"><label>On Sale</label><select id="editProdOnSale"><option value="false">No</option><option value="true">Yes</option></select></div>
+                <div class="form-group"><label>Image</label><div class="file-input-wrapper"><input type="file" id="editProdImage" accept="image/*" onchange="previewImage(this, 'editProdImagePreview')"><div class="file-label">📸 Change</div></div><div class="file-preview" id="editProdImagePreview"><img src="" alt="Preview"></div></div>
+                <div class="form-group"><label><input type="checkbox" id="editProdActive"> Active</label></div>
+                <button type="submit" class="btn-primary">💾 Update Product</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal-overlay" id="editUserModal">
+        <div class="modal-box">
+            <div class="modal-header"><h2>Edit User</h2><span class="modal-close" onclick="closeUserModal()">✕</span></div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group"><label>Name *</label><input type="text" id="editUserName" required></div>
+                <div class="form-group"><label>Email *</label><input type="email" id="editUserEmail" required></div>
+                <div class="form-group"><label>Role *</label><select id="editUserRole"><option value="customer">👤 Customer</option><option value="shop">🏪 Shop Owner</option><option value="admin">🛡️ Admin</option></select></div>
+                <div class="form-group"><label>Phone</label><input type="tel" id="editUserPhone"></div>
+                <div class="form-group"><label>Address</label><input type="text" id="editUserAddress"></div>
+                <button type="submit" class="btn-primary">💾 Update User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Banner Modal -->
+    <div class="modal-overlay" id="editBannerModal">
+        <div class="modal-box">
+            <div class="modal-header"><h2>Edit Banner</h2><span class="modal-close" onclick="closeBannerModal()">✕</span></div>
+            <form id="editBannerForm">
+                <input type="hidden" id="editBannerId">
+                <div class="form-group"><label>Image</label><div class="file-input-wrapper"><input type="file" id="editBannerImage" accept="image/*" onchange="previewImage(this, 'editBannerImagePreview')"><div class="file-label">📸 Change</div></div><div class="file-preview" id="editBannerImagePreview"><img src="" alt="Preview"></div></div>
+                <div class="form-group"><label>Title</label><input type="text" id="editBannerTitle"></div>
+                <div class="form-group"><label>Subtitle</label><input type="text" id="editBannerSubtitle"></div>
+                <div class="form-group"><label>Link URL</label><input type="url" id="editBannerLink"></div>
+                <div class="form-group"><label>Display Order</label><input type="number" id="editBannerOrder"></div>
+                <div class="form-group"><label><input type="checkbox" id="editBannerActive"> Active</label></div>
+                <button type="submit" class="btn-primary">💾 Update Banner</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js",
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from 'firebase/app';
+        import { getAuth, onAuthStateChanged } from 'firebase/auth';
+        import { getFirestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJLnUB8XnXWPEtSRAMuQr9ASmD16HLIJc",
+            authDomain: "bishalshrestha17-de676.firebaseapp.com",
+            projectId: "bishalshrestha17-de676",
+            storageBucket: "bishalshrestha17-de676.firebasestorage.app",
+            messagingSenderId: "631628771230",
+            appId: "1:631628771230:web:389c6430535f6a46b6708f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allShops = [], allProducts = [], allUsers = [], allBanners = [];
+
+        function showToast(msg, type='success') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity='0'; t.style.transform='translateY(20px)'; t.style.transition='all 0.3s'; setTimeout(()=>t.remove(),300); }, 3000);
+        }
+        window.showToast = showToast;
+
+        window.previewImage = function(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => { preview.querySelector('img').src = e.target.result; preview.classList.add('show'); };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        async function uploadToImageBB(file) {
+            return new Promise((resolve, reject) => {
+                const valid = ['image/jpeg','image/png','image/webp','image/gif'];
+                if (!valid.includes(file.type)) reject(new Error('Invalid file type.'));
+                if (file.size > 5*1024*1024) reject(new Error('Max 5MB.'));
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const base64 = e.target.result.split(',')[1];
+                    const formData = new FormData();
+                    formData.append('key', 'f69fb2e400656818bbdb2b33cb144c3f');
+                    formData.append('image', base64);
+                    try {
+                        const res = await fetch('https://api.imgbb.com/1/upload', { method:'POST', body:formData });
+                        const data = await res.json();
+                        if (data.success) resolve(data.data.url);
+                        else reject(new Error(data.error?.message || 'Upload failed'));
+                    } catch (err) { reject(err); }
+                };
+                reader.onerror = () => reject(new Error('File read error'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function generateShopId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let r = 'SIM';
+            for (let i=0; i<6; i++) r += chars.charAt(Math.floor(Math.random()*chars.length));
+            return r;
+        }
+
+        async function loadShopsForSelect() {
+            try {
+                const snap = await getDocs(collection(db, 'shops'));
+                const shops = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+                const sel = document.getElementById('prodShopId');
+                sel.innerHTML = '<option value="">Select Shop</option>' + shops.map(s => `<option value="${s.shopId || s.id}">${s.shopName} (${s.shopId || s.id})</option>`).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadStats() {
+            try {
+                const [shops, products, users, orders, banners] = await Promise.all([
+                    getDocs(collection(db,'shops')), getDocs(collection(db,'products')),
+                    getDocs(collection(db,'users')), getDocs(collection(db,'orders')),
+                    getDocs(collection(db,'banners'))
+                ]);
+                document.getElementById('statShops').textContent = shops.size;
+                document.getElementById('statProducts').textContent = products.size;
+                document.getElementById('statUsers').textContent = users.size;
+                document.getElementById('statOrders').textContent = orders.size;
+                document.getElementById('statBanners').textContent = banners.size;
+            } catch(e) { console.error(e); }
+        }
+
+        // CREATE SHOP
+        document.getElementById('createShopForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('createShopBtn');
+            btn.disabled = true; btn.textContent = 'Creating...';
+            try {
+                const shopName = document.getElementById('shopName').value.trim();
+                const ownerName = document.getElementById('ownerName').value.trim();
+                const ownerEmail = document.getElementById('ownerEmail').value.trim();
+                const phone = document.getElementById('shopPhone').value.trim();
+                const whatsapp = document.getElementById('shopWhatsapp').value.trim();
+                const pan = document.getElementById('shopPan').value.trim();
+                const category = document.getElementById('shopCategory').value;
+                const district = document.getElementById('shopDistrict').value;
+                const address = document.getElementById('shopAddress').value.trim();
+                const description = document.getElementById('shopDescription').value.trim();
+                const delivery = document.getElementById('shopDelivery').value.trim();
+                const openTime = document.getElementById('shopOpenTime').value.trim();
+                const closeTime = document.getElementById('shopCloseTime').value.trim();
+                const commission = parseFloat(document.getElementById('shopCommission').value) || 0;
+
+                if (!shopName || !ownerName || !ownerEmail || !phone || !category || !district || !address) {
+                    showToast('Please fill all required fields', 'error');
+                    btn.disabled = false; btn.textContent = '🏪 Create Shop'; return;
+                }
+
+                let photoURL='', logoURL='';
+                const pf = document.getElementById('shopPhoto').files[0];
+                const lf = document.getElementById('shopLogo').files[0];
+                if (pf) photoURL = await uploadToImageBB(pf);
+                if (lf) logoURL = await uploadToImageBB(lf);
+
+                const shopId = generateShopId();
+                const shopData = {
+                    shopId, shopName, ownerName, ownerId: '', email: ownerEmail, phone,
+                    whatsappNumber: whatsapp || phone, panNo: pan || '', category, district, address,
+                    description: description || '', shopPhotoURL: photoURL || '', logoURL: logoURL || '',
+                    rating: 0, reviewCount: 0, isVerified: false, isActive: true,
+                    deliveryTime: delivery || '1-2 days', openTime: openTime || '9:00 AM',
+                    closeTime: closeTime || '9:00 PM', isOpen: true,
+                    commission: commission, // fixed in Rs
+                    lat: 27.7172, lng: 85.3240,
+                    createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+                    stats: { totalProducts: 0, totalOrders: 0, totalRevenue: 0 }
+                };
+                await setDoc(doc(db, 'shops', shopId), shopData);
+
+                // Update user role if exists
+                const usersSnap = await getDocs(query(collection(db, 'users'), where('email', '==', ownerEmail)));
+                if (!usersSnap.empty) {
+                    const userDoc = usersSnap.docs[0];
+                    await updateDoc(doc(db, 'users', userDoc.id), { role: 'shop', shopId, updatedAt: serverTimestamp() });
+                }
+                showToast(`Shop "${shopName}" created! 🎉`, 'success');
+                this.reset();
+                document.getElementById('shopPhotoPreview').classList.remove('show');
+                document.getElementById('shopLogoPreview').classList.remove('show');
+                loadShopsList(); loadStats(); loadShopsForSelect();
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '🏪 Create Shop'; }
+        });
+
+        // LOAD SHOPS
+        async function loadShopsList() {
+            try {
+                const snap = await getDocs(collection(db, 'shops'));
+                allShops = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+                renderShops(allShops);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderShops(shops) {
+            const container = document.getElementById('shopsTableContainer');
+            if (!shops.length) {
+                container.innerHTML = `<div class="empty-state"><span class="emoji">🏪</span><h3>No shops yet</h3></div>`;
+                return;
+            }
+            container.innerHTML = `<table>
+                <thead><tr><th>Logo</th><th>ID</th><th>Name</th><th>Category</th><th>Commission (Rs)</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>${shops.map(s => `
+                    <tr>
+                        <td><img class="shop-logo-sm" src="${s.logoURL || 'https://picsum.photos/40/40'}" onerror="this.src='https://picsum.photos/40/40'"></td>
+                        <td><strong>${s.shopId || s.id}</strong></td>
+                        <td>${s.shopName}</td>
+                        <td>${s.category || 'N/A'}</td>
+                        <td>Rs. ${s.commission || 0}</td>
+                        <td><span style="color:${s.isActive ? '#000' : '#cc0000'};font-weight:600;">${s.isActive ? '✅ Active' : '❌ Inactive'}</span></td>
+                        <td><div class="actions">
+                            <button class="btn-secondary" onclick="editShop('${s.id}')">✏️ Edit</button>
+                            <button class="btn-secondary" onclick="toggleShop('${s.id}')">${s.isActive ? 'Deactivate' : 'Activate'}</button>
+                            <button class="btn-danger" onclick="deleteShop('${s.id}')">🗑️</button>
+                        </div></td>
+                    </tr>
+                `).join('')}</tbody></table>`;
+        }
+
+        window.filterShops = function(q) {
+            const search = q.toLowerCase();
+            const filtered = allShops.filter(s => 
+                (s.shopName||'').toLowerCase().includes(search) || 
+                (s.shopId||'').toLowerCase().includes(search) ||
+                (s.category||'').toLowerCase().includes(search)
+            );
+            renderShops(filtered);
+        };
+
+        window.toggleShop = async function(id) {
+            try {
+                const ref = doc(db, 'shops', id);
+                const docSnap = await getDoc(ref);
+                if (docSnap.exists()) {
+                    const current = docSnap.data().isActive;
+                    await updateDoc(ref, { isActive: !current, updatedAt: serverTimestamp() });
+                    showToast(`Shop ${!current ? 'activated' : 'deactivated'}`, 'success');
+                    loadShopsList(); loadStats();
+                }
+            } catch(e) { showToast('Failed', 'error'); }
+        };
+
+        window.deleteShop = async function(id) {
+            if (!confirm('Delete this shop?')) return;
+            try { await deleteDoc(doc(db, 'shops', id)); showToast('Deleted', 'success'); loadShopsList(); loadStats(); } 
+            catch(e) { showToast('Failed', 'error'); }
+        };
+
+        // EDIT SHOP
+        window.editShop = function(id) {
+            const shop = allShops.find(s => s.id === id);
+            if (!shop) return;
+            document.getElementById('editShopId').value = id;
+            document.getElementById('editShopName').value = shop.shopName || '';
+            document.getElementById('editShopOwner').value = shop.ownerName || '';
+            document.getElementById('editShopEmail').value = shop.email || '';
+            document.getElementById('editShopPhone').value = shop.phone || '';
+            document.getElementById('editShopWhatsapp').value = shop.whatsappNumber || '';
+            document.getElementById('editShopPan').value = shop.panNo || '';
+            document.getElementById('editShopCategory').value = shop.category || 'Other';
+            document.getElementById('editShopDistrict').value = shop.district || 'Kathmandu';
+            document.getElementById('editShopAddress').value = shop.address || '';
+            document.getElementById('editShopDescription').value = shop.description || '';
+            document.getElementById('editShopDelivery').value = shop.deliveryTime || '';
+            document.getElementById('editShopOpenTime').value = shop.openTime || '';
+            document.getElementById('editShopCloseTime').value = shop.closeTime || '';
+            document.getElementById('editShopCommission').value = shop.commission || 0;
+            document.getElementById('editShopActive').checked = shop.isActive !== false;
+            document.getElementById('editShopVerified').checked = shop.isVerified === true;
+            document.getElementById('editShopOpen').checked = shop.isOpen === true;
+            if (shop.logoURL) { const p = document.getElementById('editShopLogoPreview'); p.querySelector('img').src = shop.logoURL; p.classList.add('show'); }
+            if (shop.shopPhotoURL) { const p = document.getElementById('editShopPhotoPreview'); p.querySelector('img').src = shop.shopPhotoURL; p.classList.add('show'); }
+            document.getElementById('editShopModal').classList.add('show');
+        };
+
+        window.closeShopModal = () => document.getElementById('editShopModal').classList.remove('show');
+
+        document.getElementById('editShopForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Updating...';
+            try {
+                const id = document.getElementById('editShopId').value;
+                const data = {
+                    shopName: document.getElementById('editShopName').value.trim(),
+                    ownerName: document.getElementById('editShopOwner').value.trim(),
+                    email: document.getElementById('editShopEmail').value.trim(),
+                    phone: document.getElementById('editShopPhone').value.trim(),
+                    whatsappNumber: document.getElementById('editShopWhatsapp').value.trim(),
+                    panNo: document.getElementById('editShopPan').value.trim(),
+                    category: document.getElementById('editShopCategory').value,
+                    district: document.getElementById('editShopDistrict').value,
+                    address: document.getElementById('editShopAddress').value.trim(),
+                    description: document.getElementById('editShopDescription').value.trim(),
+                    deliveryTime: document.getElementById('editShopDelivery').value.trim(),
+                    openTime: document.getElementById('editShopOpenTime').value.trim(),
+                    closeTime: document.getElementById('editShopCloseTime').value.trim(),
+                    commission: parseFloat(document.getElementById('editShopCommission').value) || 0,
+                    isActive: document.getElementById('editShopActive').checked,
+                    isVerified: document.getElementById('editShopVerified').checked,
+                    isOpen: document.getElementById('editShopOpen').checked,
+                    updatedAt: serverTimestamp()
+                };
+                const lf = document.getElementById('editShopLogo').files[0];
+                if (lf) data.logoURL = await uploadToImageBB(lf);
+                const pf = document.getElementById('editShopPhoto').files[0];
+                if (pf) data.shopPhotoURL = await uploadToImageBB(pf);
+                await updateDoc(doc(db, 'shops', id), data);
+                showToast('Shop updated! ✅', 'success');
+                closeShopModal();
+                loadShopsList(); loadStats();
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '💾 Update Shop'; }
+        });
+
+        // LOAD PRODUCTS
+        async function loadProductsList() {
+            try {
+                const snap = await getDocs(collection(db, 'products'));
+                allProducts = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+                renderProducts(allProducts);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderProducts(products) {
+            const container = document.getElementById('productsTableContainer');
+            if (!products.length) {
+                container.innerHTML = `<div class="empty-state"><span class="emoji">📦</span><h3>No products yet</h3></div>`;
+                return;
+            }
+            container.innerHTML = `<table>
+                <thead><tr><th>Image</th><th>Name</th><th>Shop</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>${products.map(p => `
+                    <tr>
+                        <td><img class="product-img" src="${p.imageURL || 'https://picsum.photos/50/50'}" onerror="this.src='https://picsum.photos/50/50'"></td>
+                        <td><strong>${p.productName}</strong></td>
+                        <td>${p.shopName || p.shopId || 'N/A'}</td>
+                        <td>Rs. ${(p.price||0).toLocaleString()}</td>
+                        <td>${p.stock||0}</td>
+                        <td><span style="color:${p.isActive ? '#000' : '#cc0000'};">${p.isActive ? '✅ Active' : '❌ Inactive'}</span></td>
+                        <td><div class="actions">
+                            <button class="btn-secondary" onclick="editProduct('${p.id}')">✏️ Edit</button>
+                            <button class="btn-secondary" onclick="toggleProduct('${p.id}')">${p.isActive ? 'Deactivate' : 'Activate'}</button>
+                            <button class="btn-danger" onclick="deleteProduct('${p.id}')">🗑️</button>
+                        </div></td>
+                    </tr>
+                `).join('')}</tbody></table>`;
+        }
+
+        window.filterProducts = function(q) {
+            const search = q.toLowerCase();
+            const filtered = allProducts.filter(p => 
+                (p.productName||'').toLowerCase().includes(search) ||
+                (p.shopName||'').toLowerCase().includes(search)
+            );
+            renderProducts(filtered);
+        };
+
+        window.toggleProduct = async function(id) {
+            try {
+                const ref = doc(db, 'products', id);
+                const docSnap = await getDoc(ref);
+                if (docSnap.exists()) {
+                    const current = docSnap.data().isActive;
+                    await updateDoc(ref, { isActive: !current, updatedAt: serverTimestamp() });
+                    showToast(`Product ${!current ? 'activated' : 'deactivated'}`, 'success');
+                    loadProductsList(); loadStats();
+                }
+            } catch(e) { showToast('Failed', 'error'); }
+        };
+
+        window.deleteProduct = async function(id) {
+            if (!confirm('Delete this product?')) return;
+            try { await deleteDoc(doc(db, 'products', id)); showToast('Deleted', 'success'); loadProductsList(); loadStats(); } 
+            catch(e) { showToast('Failed', 'error'); }
+        };
+
+        // EDIT PRODUCT
+        window.editProduct = function(id) {
+            const p = allProducts.find(prod => prod.id === id);
+            if (!p) return;
+            document.getElementById('editProductId').value = id;
+            document.getElementById('editProdName').value = p.productName || '';
+            document.getElementById('editProdDescription').value = p.description || '';
+            document.getElementById('editProdCategory').value = p.category || 'Grocery';
+            document.getElementById('editProdPrice').value = p.price || '';
+            document.getElementById('editProdUnit').value = p.unit || '';
+            document.getElementById('editProdStock').value = p.stock || '';
+            document.getElementById('editProdDiscountPrice').value = p.discountPrice || '';
+            document.getElementById('editProdOnSale').value = p.onSale ? 'true' : 'false';
+            document.getElementById('editProdActive').checked = p.isActive !== false;
+            if (p.imageURL) { const pr = document.getElementById('editProdImagePreview'); pr.querySelector('img').src = p.imageURL; pr.classList.add('show'); }
+            document.getElementById('modalTitle').textContent = 'Edit Product';
+            document.getElementById('editModal').classList.add('show');
+        };
+
+        window.closeModal = () => document.getElementById('editModal').classList.remove('show');
+
+        document.getElementById('editProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Updating...';
+            try {
+                const id = document.getElementById('editProductId').value;
+                const data = {
+                    productName: document.getElementById('editProdName').value.trim(),
+                    description: document.getElementById('editProdDescription').value.trim(),
+                    category: document.getElementById('editProdCategory').value,
+                    price: parseFloat(document.getElementById('editProdPrice').value),
+                    unit: document.getElementById('editProdUnit').value.trim(),
+                    stock: parseInt(document.getElementById('editProdStock').value),
+                    discountPrice: parseFloat(document.getElementById('editProdDiscountPrice').value) || null,
+                    onSale: document.getElementById('editProdOnSale').value === 'true',
+                    isActive: document.getElementById('editProdActive').checked,
+                    updatedAt: serverTimestamp()
+                };
+                const img = document.getElementById('editProdImage').files[0];
+                if (img) data.imageURL = await uploadToImageBB(img);
+                await updateDoc(doc(db, 'products', id), data);
+                showToast('Product updated! ✅', 'success');
+                closeModal();
+                loadProductsList(); loadStats();
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '💾 Update Product'; }
+        });
+
+        // ADD PRODUCT
+        document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('addProductBtn');
+            btn.disabled = true; btn.textContent = 'Adding...';
+            try {
+                const name = document.getElementById('prodName').value.trim();
+                const desc = document.getElementById('prodDescription').value.trim();
+                const category = document.getElementById('prodCategory').value;
+                const price = parseFloat(document.getElementById('prodPrice').value);
+                const unit = document.getElementById('prodUnit').value.trim();
+                const stock = parseInt(document.getElementById('prodStock').value);
+                const discountPrice = parseFloat(document.getElementById('prodDiscountPrice').value) || null;
+                const onSale = document.getElementById('prodOnSale').value === 'true';
+                const shopId = document.getElementById('prodShopId').value;
+                const isActive = document.getElementById('prodActive').checked;
+                if (!name || !category || !price || isNaN(stock) || !shopId) {
+                    showToast('Please fill all required fields', 'error');
+                    btn.disabled = false; btn.textContent = '➕ Add Product'; return;
+                }
+                const shopDoc = await getDoc(doc(db, 'shops', shopId));
+                const shopName = shopDoc.exists() ? shopDoc.data().shopName : 'Shop';
+                let imageURL = '';
+                const imgFile = document.getElementById('prodImage').files[0];
+                if (imgFile) imageURL = await uploadToImageBB(imgFile);
+
+                await setDoc(doc(collection(db, 'products')), {
+                    shopId, shopName, productName: name, description: desc, category, price, unit: unit || '',
+                    stock, sold: 0, discountPrice, onSale, imageURL: imageURL || '',
+                    isActive, createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+                });
+                showToast('Product added! 🎉', 'success');
+                this.reset();
+                document.getElementById('prodImagePreview').classList.remove('show');
+                loadProductsList(); loadStats();
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '➕ Add Product'; }
+        });
+
+        // USERS
+        async function loadUsersList() {
+            try {
+                const snap = await getDocs(collection(db, 'users'));
+                allUsers = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+                renderUsers(allUsers);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderUsers(users) {
+            const container = document.getElementById('usersTableContainer');
+            if (!users.length) {
+                container.innerHTML = `<div class="empty-state"><span class="emoji">👥</span><h3>No users yet</h3></div>`;
+                return;
+            }
+            container.innerHTML = `<table>
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Actions</th></tr></thead>
+                <tbody>${users.map(u => `
+                    <tr>
+                        <td>${u.name || 'N/A'}</td>
+                        <td>${u.email || 'N/A'}</td>
+                        <td><span style="font-weight:600;">${u.role === 'admin' ? '🛡️ Admin' : u.role === 'shop' ? '🏪 Shop' : '👤 Customer'}</span></td>
+                        <td>${u.phone || 'N/A'}</td>
+                        <td><div class="actions">
+                            <button class="btn-secondary" onclick="editUser('${u.id}')">✏️ Edit</button>
+                            <button class="btn-danger" onclick="deleteUser('${u.id}')">🗑️</button>
+                        </div></td>
+                    </tr>
+                `).join('')}</tbody></table>`;
+        }
+
+        window.filterUsers = function(q) {
+            const search = q.toLowerCase();
+            const filtered = allUsers.filter(u => (u.name||'').toLowerCase().includes(search) || (u.email||'').toLowerCase().includes(search));
+            renderUsers(filtered);
+        };
+
+        window.editUser = function(id) {
+            const u = allUsers.find(user => user.id === id);
+            if (!u) return;
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUserName').value = u.name || '';
+            document.getElementById('editUserEmail').value = u.email || '';
+            document.getElementById('editUserRole').value = u.role || 'customer';
+            document.getElementById('editUserPhone').value = u.phone || '';
+            document.getElementById('editUserAddress').value = u.address || '';
+            document.getElementById('editUserModal').classList.add('show');
+        };
+
+        window.closeUserModal = () => document.getElementById('editUserModal').classList.remove('show');
+
+        document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Updating...';
+            try {
+                const id = document.getElementById('editUserId').value;
+                const data = {
+                    name: document.getElementById('editUserName').value.trim(),
+                    email: document.getElementById('editUserEmail').value.trim(),
+                    role: document.getElementById('editUserRole').value,
+                    phone: document.getElementById('editUserPhone').value.trim(),
+                    address: document.getElementById('editUserAddress').value.trim(),
+                    updatedAt: serverTimestamp()
+                };
+                await updateDoc(doc(db, 'users', id), data);
+                showToast('User updated! ✅', 'success');
+                closeUserModal();
+                loadUsersList(); loadStats();
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '💾 Update User'; }
+        });
+
+        window.deleteUser = async function(id) {
+            if (!confirm('Delete this user?')) return;
+            try { await deleteDoc(doc(db, 'users', id)); showToast('Deleted', 'success'); loadUsersList(); loadStats(); } 
+            catch(e) { showToast('Failed', 'error'); }
+        };
+
+        // BANNERS
+        async function loadBanners() {
+            try {
+                const q = query(collection(db, 'banners'), orderBy('order', 'asc'));
+                const snap = await getDocs(q);
+                allBanners = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+                renderBanners();
+            } catch(e) { console.error(e); }
+        }
+
+        function renderBanners() {
+            const container = document.getElementById('bannersListContainer');
+            if (!allBanners.length) {
+                container.innerHTML = `<div class="empty-state"><span class="emoji">🖼️</span><h3>No banners yet</h3></div>`;
+                return;
+            }
+            container.innerHTML = allBanners.map(b => `
+                <div class="banner-preview-card">
+                    <img class="preview-img" src="${b.imageURL || 'https://picsum.photos/120/70'}" onerror="this.src='https://picsum.photos/120/70'">
+                    <div class="info">
+                        <div class="title">${b.title || 'Untitled'}</div>
+                        ${b.subtitle ? `<div class="subtitle">${b.subtitle}</div>` : ''}
+                        <div class="subtitle">🔗 ${b.link || 'No link'}</div>
+                        <div style="margin-top:4px;display:flex;gap:12px;flex-wrap:wrap;">
+                            <span style="font-size:12px;color:${b.isActive !== false ? '#00cc00' : '#cc0000'};font-weight:600;">${b.isActive !== false ? '✅ Active' : '❌ Inactive'}</span>
+                            <span style="font-size:11px;color:#888;">Order: ${b.order || 0}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:6px;">
+                        <button class="btn-secondary" onclick="editBanner('${b.id}')">✏️ Edit</button>
+                        <button class="btn-secondary" onclick="toggleBanner('${b.id}')">${b.isActive !== false ? 'Deactivate' : 'Activate'}</button>
+                        <button class="btn-danger" onclick="deleteBanner('${b.id}')">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.editBanner = function(id) {
+            const b = allBanners.find(bn => bn.id === id);
+            if (!b) return;
+            document.getElementById('editBannerId').value = id;
+            document.getElementById('editBannerTitle').value = b.title || '';
+            document.getElementById('editBannerSubtitle').value = b.subtitle || '';
+            document.getElementById('editBannerLink').value = b.link || '';
+            document.getElementById('editBannerOrder').value = b.order || 1;
+            document.getElementById('editBannerActive').checked = b.isActive !== false;
+            if (b.imageURL) { const p = document.getElementById('editBannerImagePreview'); p.querySelector('img').src = b.imageURL; p.classList.add('show'); }
+            document.getElementById('editBannerModal').classList.add('show');
+        };
+
+        window.closeBannerModal = () => document.getElementById('editBannerModal').classList.remove('show');
+
+        document.getElementById('editBannerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Updating...';
+            try {
+                const id = document.getElementById('editBannerId').value;
+                const data = {
+                    title: document.getElementById('editBannerTitle').value.trim() || 'Advertisement',
+                    subtitle: document.getElementById('editBannerSubtitle').value.trim(),
+                    link: document.getElementById('editBannerLink').value.trim() || '/',
+                    order: parseInt(document.getElementById('editBannerOrder').value) || 1,
+                    isActive: document.getElementById('editBannerActive').checked,
+                    updatedAt: serverTimestamp()
+                };
+                const img = document.getElementById('editBannerImage').files[0];
+                if (img) data.imageURL = await uploadToImageBB(img);
+                await updateDoc(doc(db, 'banners', id), data);
+                showToast('Banner updated! ✅', 'success');
+                closeBannerModal();
+                loadBanners(); loadStats();
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '💾 Update Banner'; }
+        });
+
+        document.getElementById('addBannerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('addBannerBtn');
+            btn.disabled = true; btn.textContent = 'Uploading...';
+            try {
+                const title = document.getElementById('bannerTitle').value.trim() || 'Advertisement';
+                const subtitle = document.getElementById('bannerSubtitle').value.trim();
+                const link = document.getElementById('bannerLink').value.trim() || '/';
+                const order = parseInt(document.getElementById('bannerOrder').value) || 1;
+                const isActive = document.getElementById('bannerActive').checked;
+                const imgFile = document.getElementById('bannerImage').files[0];
+                if (!imgFile) { showToast('Please select an image', 'error'); btn.disabled=false; btn.textContent='➕ Add Banner'; return; }
+                const imageURL = await uploadToImageBB(imgFile);
+                await setDoc(doc(collection(db, 'banners')), {
+                    imageURL, title, subtitle: subtitle || '', link, order, isActive,
+                    createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+                });
+                showToast('Banner added! 🎉', 'success');
+                this.reset();
+                document.getElementById('bannerImagePreview').classList.remove('show');
+                loadBanners(); loadStats();
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '➕ Add Banner'; }
+        });
+
+        window.toggleBanner = async function(id) {
+            try {
+                const ref = doc(db, 'banners', id);
+                const docSnap = await getDoc(ref);
+                if (docSnap.exists()) {
+                    const current = docSnap.data().isActive;
+                    await updateDoc(ref, { isActive: !current, updatedAt: serverTimestamp() });
+                    showToast(`Banner ${!current ? 'activated' : 'deactivated'}`, 'success');
+                    loadBanners(); loadStats();
+                }
+            } catch(e) { showToast('Failed', 'error'); }
+        };
+
+        window.deleteBanner = async function(id) {
+            if (!confirm('Delete this banner?')) return;
+            try { await deleteDoc(doc(db, 'banners', id)); showToast('Deleted', 'success'); loadBanners(); loadStats(); } 
+            catch(e) { showToast('Failed', 'error'); }
+        };
+
+        // NOTIFICATIONS
+        document.getElementById('notifForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('sendNotifBtn');
+            btn.disabled = true; btn.textContent = 'Sending...';
+            try {
+                const title = document.getElementById('notifTitle').value.trim();
+                const body = document.getElementById('notifBody').value.trim();
+                const target = document.getElementById('notifTarget').value;
+                const image = document.getElementById('notifImage').value.trim();
+                const link = document.getElementById('notifLink').value.trim();
+                if (!title || !body) { showToast('Fill title and message', 'error'); btn.disabled=false; btn.textContent='📨 Send'; return; }
+                await setDoc(doc(collection(db, 'notifications')), {
+                    title, body, imageURL: image || '', link: link || '',
+                    sentBy: 'admin', targetRole: target, isActive: true, createdAt: serverTimestamp()
+                });
+                showToast('Notification sent! 📨', 'success');
+                this.reset();
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '📨 Send'; }
+        });
+
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('sendEmailBtn');
+            btn.disabled = true; btn.textContent = 'Sending...';
+            try {
+                const subject = document.getElementById('emailSubject').value.trim();
+                const body = document.getElementById('emailBody').value.trim();
+                const target = document.getElementById('emailTarget').value;
+                if (!subject || !body) { showToast('Fill subject and body', 'error'); btn.disabled=false; btn.textContent='📧 Send Email'; return; }
+                await setDoc(doc(collection(db, 'notifications')), {
+                    title: subject, body, sentBy: 'admin', targetRole: target, type: 'email',
+                    isActive: true, createdAt: serverTimestamp()
+                });
+                showToast('Email sent! 📧', 'success');
+                this.reset();
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '📧 Send Email'; }
+        });
+
+        // SETTINGS
+        document.getElementById('settingsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Saving...';
+            try {
+                const siteName = document.getElementById('siteName').value.trim();
+                let logoURL='', adURL='';
+                const lf = document.getElementById('siteLogoUpload').files[0];
+                if (lf) logoURL = await uploadToImageBB(lf);
+                const af = document.getElementById('adImageUpload').files[0];
+                if (af) adURL = await uploadToImageBB(af);
+                const ref = doc(db, 'siteSettings', 'general');
+                const snap = await getDoc(ref);
+                const data = { siteName: siteName || 'Simha', updatedAt: serverTimestamp() };
+                if (logoURL) data.logoURL = logoURL;
+                if (adURL) data.adImageURL = adURL;
+                if (snap.exists()) await updateDoc(ref, data);
+                else await setDoc(ref, data);
+                showToast('Settings saved! ✅', 'success');
+                document.getElementById('siteLogoPreview').classList.remove('show');
+                document.getElementById('adImagePreview').classList.remove('show');
+            } catch(e) { showToast('Failed: '+e.message, 'error'); }
+            finally { btn.disabled = false; btn.textContent = '💾 Save Settings'; }
+        });
+
+        async function loadSettings() {
+            try {
+                const snap = await getDoc(doc(db, 'siteSettings', 'general'));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.siteName) document.getElementById('siteName').value = data.siteName;
+                    if (data.logoURL) { const p = document.getElementById('siteLogoPreview'); p.querySelector('img').src = data.logoURL; p.classList.add('show'); }
+                    if (data.adImageURL) { const p = document.getElementById('adImagePreview'); p.querySelector('img').src = data.adImageURL; p.classList.add('show'); }
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.admin-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+            document.querySelectorAll('.tab-content').forEach(content => {
+                const tabName = tab.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
+                content.classList.toggle('active', content.id === 'tab' + tabName);
+            });
+        };
+
+        // AUTH
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docSnap = await getDoc(doc(db, 'users', user.uid));
+                    if (docSnap.exists() && docSnap.data().role === 'admin') {
+                        loadStats(); loadShopsList(); loadProductsList(); loadUsersList(); loadBanners(); loadShopsForSelect(); loadSettings();
+                    } else {
+                        showToast('Access denied. Admin only.', 'error');
+                        window.location.href = 'index.html';
+                    }
+                } catch(e) { console.error(e); }
+            } else {
+                window.location.href = 'auth.html';
+            }
+        });
+
+        console.log('✅ Admin Panel with fixed Rs commission and real shop display');
+    </script>
+</body>
+</html>
