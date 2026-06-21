@@ -186,6 +186,12 @@
         .btn-secondary:hover { border-color: var(--ink); background: #f4f6f8; }
         .btn-primary:disabled, .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
 
+        /* WHATSAPP ORDER DETAILS BUTTON */
+        .btn-whatsapp-order {
+            padding: 8px 18px; background: #25D366; color: #fff; border: none; border-radius: var(--radius-sm); font-weight: 600; font-size: 12px; cursor: pointer; transition: opacity 0.2s; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-whatsapp-order:hover { opacity: 0.85; }
+
         /* EMPTY STATE */
         .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-2); }
         .empty-state .emoji { font-size: 48px; display: block; margin-bottom: 12px; }
@@ -339,9 +345,8 @@
     const db   = getFirestore(app);
 
     // ── STATE ────────────────────────────────────────────────────
-    // FIX: allOrdersData holds EVERY order; allOrders is the displayed slice
-    let allOrdersData = [];   // full list from Firestore (all pages)
-    let displayedOrders = []; // currently rendered (may be paged)
+    let allOrdersData = [];
+    let displayedOrders = [];
     let currentFilter = 'all';
     let unsubscribeOrders = null;
     const PAGE_SIZE = 10;
@@ -403,6 +408,93 @@
             </div>`).join('');
     }
 
+    // ── BUILD WHATSAPP MESSAGE WITH ALL DETAILS ──────────────────
+    function buildWhatsAppOrderMessage(order) {
+        const customerName = order.customerName || 'N/A';
+        const customerPhone = order.customerPhone || 'N/A';
+        const customerEmail = order.customerEmail || 'N/A';
+        const deliveryAddress = order.deliveryAddress || 'N/A';
+        const district = order.district || 'N/A';
+        const shopName = order.shopName || 'Shop';
+        const orderId = order.orderId || order.id;
+        const total = order.totalAmount || 0;
+
+        // Build items list with images
+        const itemsList = (order.items || []).map(item => {
+            const itemTotal = (item.price || 0) * (item.qty || 0);
+            const image = item.imageURL ? `\n   📸 ${item.imageURL}` : '';
+            return `   • ${item.productName || 'Product'} ×${item.qty || 0} ${item.unit || ''} = Rs. ${itemTotal.toLocaleString()}${image}`;
+        }).join('\n');
+
+        const itemCount = (order.items || []).length;
+
+        // Location
+        const location = order.customerLocation;
+        const mapsLink = location && location.lat && location.lng 
+            ? `https://maps.google.com/?q=${location.lat},${location.lng}` 
+            : 'Not shared';
+
+        // Delivery address with Google Maps link
+        const addressLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deliveryAddress)}`;
+
+        return `🛍️ *ORDER DETAILS - Simha*\n\n` +
+               `━━━━━━━━━━━━━━━━━━━━\n` +
+               `📋 *Order ID:* ${orderId}\n` +
+               `📅 *Date:* ${formatDate(order.createdAt)}\n` +
+               `📌 *Status:* ${(order.status || 'Pending').toUpperCase()}\n\n` +
+               `━━━━━━━━━━━━━━━━━━━━\n` +
+               `👤 *CUSTOMER DETAILS*\n` +
+               `   Name: ${customerName}\n` +
+               `   📞 Phone: ${customerPhone}\n` +
+               `   📧 Email: ${customerEmail}\n` +
+               `   📍 District: ${district}\n` +
+               `   🏠 Address: ${deliveryAddress}\n` +
+               `   🗺️ Map: ${addressLink}\n\n` +
+               `━━━━━━━━━━━━━━━━━━━━\n` +
+               `📍 *LIVE LOCATION*\n` +
+               `   ${mapsLink}\n\n` +
+               `━━━━━━━━━━━━━━━━━━━━\n` +
+               `🏪 *SHOP DETAILS*\n` +
+               `   Shop: ${shopName}\n` +
+               `   📞 WhatsApp: ${order.shopWhatsapp || 'N/A'}\n\n` +
+               `━━━━━━━━━━━━━━━━━━━━\n` +
+               `📦 *ITEMS (${itemCount})*\n` +
+               `${itemsList}\n\n` +
+               `━━━━━━━━━━━━━━━━━━━━\n` +
+               `💰 *TOTAL: Rs. ${total.toLocaleString()}*\n` +
+               `━━━━━━━━━━━━━━━━━━━━\n\n` +
+               `_Order placed via Simha App_ 🙏`;
+    }
+
+    // ── SEND ORDER DETAILS TO WHATSAPP ──────────────────────────
+    window.sendOrderToWhatsApp = async function(orderId) {
+        const order = allOrdersData.find(o => o.id === orderId || o.orderId === orderId);
+        if (!order) {
+            showToast('Order not found', 'error');
+            return;
+        }
+
+        if (!order.shopWhatsapp) {
+            showToast('Shop WhatsApp number not available', 'error');
+            return;
+        }
+
+        try {
+            const message = buildWhatsAppOrderMessage(order);
+            const phone = order.shopWhatsapp.replace(/\D/g, '');
+            const url = `https://wa.me/977${phone}?text=${encodeURIComponent(message)}`;
+            
+            // Show confirmation before redirecting
+            if (confirm(`Send order details to ${order.shopName || 'Shop'} on WhatsApp?`)) {
+                window.open(url, '_blank');
+                showToast('Opening WhatsApp with order details...', 'success');
+            }
+        } catch (error) {
+            console.error('WhatsApp error:', error);
+            showToast('Failed to open WhatsApp', 'error');
+        }
+    };
+
     // ── RENDER ORDERS ────────────────────────────────────────────
     function renderOrders(orders) {
         if (orders.length === 0) {
@@ -419,6 +511,8 @@
         ordersList.innerHTML = orders.map(order => {
             const canCancel = !['cancelled','delivered'].includes(order.status);
             const isPendingOrCancelled = ['pending','cancelled'].includes(order.status);
+            const canWhatsApp = order.shopWhatsapp && order.status !== 'cancelled';
+            
             return `
             <div class="order-card">
                 <div class="order-header" onclick="toggleOrder('${order.id}')">
@@ -450,20 +544,27 @@
                         <div style="margin-top:8px;padding:8px;background:#fee2e2;border-radius:6px;font-size:12px;color:#991b1b;">
                             Cancelled on: ${formatDate(order.cancelledAt)}
                         </div>` : ''}
+                        
+                    ${order.customerLocation && order.customerLocation.lat ? `
+                        <div style="margin-top:8px;padding:8px;background:#f0f7ff;border-radius:6px;font-size:12px;color:#1a5a8a;">
+                            📍 Location: ${order.customerLocation.lat.toFixed(6)}, ${order.customerLocation.lng.toFixed(6)}
+                            <a href="https://maps.google.com/?q=${order.customerLocation.lat},${order.customerLocation.lng}" 
+                               target="_blank" style="display:inline-block;margin-left:8px;color:#0a6b5e;font-weight:600;">View Map</a>
+                        </div>` : ''}
                 </div>
 
                 <div class="order-footer">
                     <span class="total">Total: Rs. ${(order.totalAmount||0).toLocaleString()}</span>
                     <div class="actions">
+                        ${canWhatsApp ? `
+                            <button class="btn-whatsapp-order" onclick="sendOrderToWhatsApp('${order.id}')">
+                                💬 Send Details
+                            </button>` : ''}
                         ${canCancel ? `
                             <button class="btn-danger" data-cancel="${order.id}"
                                     onclick="cancelOrder('${order.id}')">❌ Cancel</button>` : ''}
                         ${isPendingOrCancelled ? `
                             <button class="btn-secondary" onclick="reorder('${order.id}')">🔄 Reorder</button>` : ''}
-                        ${order.shopWhatsapp ? `
-                            <button class="btn-whatsapp"
-                                    onclick="contactShop('${order.shopWhatsapp}','${order.orderId||order.id}')">
-                                💬 Contact</button>` : ''}
                         <button class="btn-secondary" onclick="toggleOrder('${order.id}')">📄 Details</button>
                     </div>
                 </div>
@@ -477,7 +578,6 @@
     };
 
     // ── APPLY FILTER ─────────────────────────────────────────────
-    // FIX: always filters from allOrdersData (full list), not just displayed page
     function applyFilter(filter) {
         currentFilter = filter;
         document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -488,11 +588,9 @@
             ? allOrdersData
             : allOrdersData.filter(o => o.status === filter);
 
-        // Show first page of filtered results
         displayedOrders = filtered.slice(0, PAGE_SIZE);
         renderOrders(displayedOrders);
 
-        // Load More only if there are more in the filtered set
         if (filtered.length > PAGE_SIZE) {
             loadMoreBtn.style.display = 'inline-block';
             loadMoreBtn.dataset.total = filtered.length;
@@ -501,13 +599,11 @@
         }
     }
 
-    // FIX: Attach filter tab clicks via JS, not inline onclick, so they stay in module scope
     document.querySelectorAll('.filter-tab').forEach(tab => {
         tab.addEventListener('click', () => applyFilter(tab.dataset.filter));
     });
 
     // ── LOAD MORE ────────────────────────────────────────────────
-    // FIX: respects current filter and uses correct source (allOrdersData filtered)
     loadMoreBtn.addEventListener('click', () => {
         const filtered = currentFilter === 'all'
             ? allOrdersData
@@ -538,7 +634,6 @@
     window.cancelOrder = async function(orderId) {
         if (!confirm('⚠️ Cancel this order?')) return;
 
-        // FIX: search full allOrdersData, not just the displayed page
         const order = allOrdersData.find(o => o.id === orderId);
         if (!order) { showToast('Order not found', 'error'); return; }
         if (order.status === 'cancelled') { showToast('Already cancelled', 'warning'); return; }
@@ -549,7 +644,6 @@
 
         try {
             await runTransaction(db, async (tx) => {
-                // READ PHASE — all reads first
                 const orderRef = doc(db, 'orders', orderId);
                 const orderSnap = await tx.get(orderRef);
                 if (!orderSnap.exists()) throw new Error('Order not found');
@@ -562,7 +656,6 @@
                     items.map(item => tx.get(doc(db, 'products', item.productId)))
                 );
 
-                // WRITE PHASE — all writes after all reads
                 tx.update(orderRef, {
                     status: 'cancelled',
                     cancelledAt: serverTimestamp(),
@@ -629,14 +722,7 @@
         }
     };
 
-    // ── CONTACT SHOP ─────────────────────────────────────────────
-    window.contactShop = (whatsapp, orderId) => {
-        const msg = `Hi, I have order ${orderId} on Simha. Can you help?`;
-        window.open(`https://wa.me/977${whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
-    };
-
     // ── REALTIME ORDERS LISTENER ─────────────────────────────────
-    // FIX: only one listener at a time; no separate getDocs call — listener handles everything
     function setupRealtimeListener(user) {
         if (unsubscribeOrders) { unsubscribeOrders(); unsubscribeOrders = null; }
 
@@ -652,17 +738,16 @@
 
             allOrdersData = orders;
             updateCounts();
-            applyFilter(currentFilter);  // re-render current filter view
+            applyFilter(currentFilter);
         }, (err) => {
             console.error('Orders listener error:', err);
             showToast('Error loading orders', 'error');
         });
     }
 
-    // ── NAV BADGES (cart + notifications) ───────────────────────
+    // ── NAV BADGES ───────────────────────────────────────────────
     async function updateNavBadges(user) {
         try {
-            // Cart count
             const cartSnap = await getDoc(doc(db, 'cart', user.uid));
             const cartCount = cartSnap.exists()
                 ? (cartSnap.data().items || []).reduce((s, i) => s + (i.qty || 0), 0) : 0;
@@ -672,7 +757,6 @@
                 cartBadge.classList.toggle('show', cartCount > 0);
             }
 
-            // FIX: guard against missing isActive field on notifications
             const notifSnap = await getDocs(query(
                 collection(db, 'notifications'),
                 where('isActive', '==', true)
@@ -709,13 +793,21 @@
     onAuthStateChanged(auth, (user) => {
         updateProfileAvatar(user);
         if (user) {
-            // FIX: only use the realtime listener — no separate loadOrders() call
             setupRealtimeListener(user);
             updateNavBadges(user);
         } else {
             window.location.href = 'auth.html';
         }
     });
+
+    // ── EXPOSE FUNCTIONS TO WINDOW ──────────────────────────────
+    window.sendOrderToWhatsApp = sendOrderToWhatsApp;
+    window.cancelOrder = cancelOrder;
+    window.reorder = reorder;
+    window.toggleOrder = toggleOrder;
+    window.showToast = showToast;
+
+    console.log('🚀 Orders Page loaded with WhatsApp auto-send');
 </script>
 </body>
 </html>
