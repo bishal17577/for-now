@@ -2,963 +2,825 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#ffffff">
     <title>Checkout - Simha</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #f4f7fb;
+            --surface: #ffffff;
+            --border: #e8ecf0;
+            --ink: #0d0d0d;
+            --ink-2: #6b727a;
+            --accent: #0a6b5e;
+            --accent-2: #e63b2e;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-xs: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-sm: 0 2px 12px rgba(0,0,0,0.06);
         }
-        body {
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html, body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f5f5f5;
-            color: #000000;
-            min-height: 100vh;
-            padding-bottom: 80px;
+            background: var(--bg); color: var(--ink);
+            width: 100%; min-height: 100vh; overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
-        button {
-            cursor: pointer;
-            font-family: inherit;
-            border: none;
-            background: none;
-            font-size: inherit;
+        .app { max-width: 1200px; margin: 0 auto; background: var(--bg); padding: 0 16px 80px; }
+
+        /* TOP NAV */
+        .top-nav {
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            padding: 0 20px; height: 56px; display: none;
+            align-items: center; justify-content: space-between;
+            border-radius: 0 0 12px 12px; margin-bottom: 16px;
+        }
+        .top-nav .logo { font-size: 20px; font-weight: 800; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+        .top-nav .logo span { color: var(--accent); }
+        .top-nav .nav-links { display: flex; gap: 28px; list-style: none; align-items: center; }
+        .top-nav .nav-links a {
+            font-size: 14px; font-weight: 500; color: var(--ink-2); transition: color 0.2s;
+            padding: 4px 0; position: relative; text-decoration: none;
+        }
+        .top-nav .nav-links a::after {
+            content: ''; position: absolute; bottom: -2px; left: 0;
+            width: 0; height: 2px; background: var(--accent); transition: width 0.3s;
+        }
+        .top-nav .nav-links a:hover::after { width: 100%; }
+        .top-nav .nav-links a:hover { color: var(--ink); }
+        .top-nav .nav-actions { display: flex; gap: 10px; align-items: center; }
+        .top-nav .nav-actions .profile-btn {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--bg);
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 14px; cursor: pointer; color: var(--ink); overflow: hidden;
+        }
+        .top-nav .nav-actions .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
+        .top-nav .nav-actions .notif-btn {
+            position: relative; font-size: 18px; cursor: pointer; padding: 4px;
+            min-width: 36px; min-height: 36px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: none; border: none; color: var(--ink);
+        }
+        .top-nav .nav-actions .notif-btn .badge {
+            position: absolute; top: 0; right: 0; background: var(--accent-2); color: #fff;
+            font-size: 8px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center; border: 2px solid var(--surface);
+        }
+        .top-nav .nav-actions .notif-btn .badge.show { display: flex; }
+        @media (min-width: 768px) { .top-nav { display: flex; } .app { padding: 0 24px 20px; } }
+
+        /* MOBILE HEADER */
+        .header {
+            background: var(--surface); padding: 8px 14px 10px;
+            border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px;
+            border-radius: 0 0 12px 12px; margin-bottom: 12px;
+        }
+        .header-top { display: flex; align-items: center; justify-content: space-between; }
+        .header-top .brand h1 { font-size: 17px; font-weight: 800; color: var(--ink); display: flex; align-items: center; gap: 4px; }
+        .header-top .brand h1 span { color: var(--accent); }
+        .header-top .actions { display: flex; gap: 4px; align-items: center; }
+        .header-top .actions button {
+            width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.04);
+            color: var(--ink); font-size: 16px; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s; position: relative; border: none;
+        }
+        .header-top .actions button .badge {
+            position: absolute; top: -2px; right: -2px; background: var(--accent-2); color: #fff;
+            font-size: 8px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center; border: 2px solid var(--surface);
+        }
+        .header-top .actions button .badge.show { display: flex; }
+        @media (min-width: 768px) { .header { display: none; } }
+
+        /* PAGE HEADER */
+        .page-header { display: flex; align-items: center; gap: 8px; margin: 12px 0 16px; }
+        .page-header h1 { font-size: 24px; font-weight: 800; }
+        .page-header .back-btn {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--surface);
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 18px; text-decoration: none; color: var(--ink); flex-shrink: 0;
         }
 
-        /* ===== NAVBAR ===== */
-        .navbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: #ffffff;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 0 16px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .navbar .logo {
-            font-size: 20px;
-            font-weight: 800;
-            color: #000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .navbar .logo span {
-            font-size: 24px;
-        }
-        .navbar .logo .sub {
-            font-weight: 400;
-            font-size: 10px;
-            color: #666;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-left: 4px;
-        }
-        .navbar .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .navbar .nav-actions .back-btn {
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px;
-        }
-        .navbar .nav-actions .profile-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #000;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            border: 2px solid #e0e0e0;
-            object-fit: cover;
-        }
-        .navbar .nav-actions .profile-avatar:hover {
-            border-color: #000;
-        }
-        .navbar .nav-actions .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        /* ===== CONTAINER ===== */
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 16px;
-        }
-
-        /* ===== SECTION ===== */
+        /* SECTIONS */
         .section {
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            padding: 20px;
-            margin-bottom: 16px;
+            background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border);
+            padding: 18px 16px; margin-bottom: 16px; box-shadow: var(--shadow-xs);
         }
-        .section h2 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
+        .section h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 
-        /* ===== ORDER SUMMARY ===== */
+        /* ORDER SUMMARY */
+        .shop-name-header { font-size: 14px; color: var(--ink-2); margin-bottom: 8px; font-weight: 500; }
         .order-summary-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
+            display: flex; align-items: center; gap: 10px; padding: 8px 0;
+            border-bottom: 1px solid #f0f2f5; font-size: 14px;
         }
-        .order-summary-item:last-child {
-            border-bottom: none;
+        .order-summary-item:last-of-type { border-bottom: none; }
+        .order-summary-item .thumb {
+            width: 40px; height: 40px; border-radius: var(--radius-sm);
+            object-fit: cover; background: #f0f2f5; flex-shrink: 0;
         }
-        .order-summary-item .name {
-            flex: 1;
-        }
-        .order-summary-item .qty {
-            margin: 0 12px;
-            color: #888;
-        }
-        .order-summary-item .price {
-            font-weight: 600;
-        }
+        .order-summary-item .info { flex: 1; }
+        .order-summary-item .info .name { font-weight: 500; }
+        .order-summary-item .info .qty { color: var(--ink-2); font-size: 12px; }
+        .order-summary-item .price { font-weight: 600; white-space: nowrap; }
         .order-total {
-            display: flex;
-            justify-content: space-between;
-            font-size: 18px;
-            font-weight: 800;
-            padding-top: 12px;
-            border-top: 2px solid #000;
-            margin-top: 8px;
-        }
-        .shop-name-header {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 8px;
+            display: flex; justify-content: space-between; font-size: 18px; font-weight: 800;
+            padding-top: 12px; border-top: 2px solid var(--ink); margin-top: 8px;
         }
 
-        /* ===== FORM ===== */
-        .form-group {
-            margin-bottom: 14px;
+        /* STOCK WARNING */
+        .stock-warning {
+            background: #fff3cd; border: 1px solid #ffc107; border-radius: var(--radius-sm);
+            padding: 8px 12px; font-size: 12px; color: #856404; margin-top: 4px; display: none;
         }
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-        }
+        .stock-warning.show { display: block; }
+
+        /* FORM */
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
         .form-group input,
         .form-group select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            background: #fff;
-            color: #000;
-            transition: border-color 0.2s;
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px;
+            font-size: 14px; font-family: 'Inter', sans-serif; background: #fff;
+            transition: border-color 0.2s; color: var(--ink);
         }
         .form-group input:focus,
         .form-group select:focus {
-            outline: none;
-            border-color: #000;
+            outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10,107,94,0.08);
         }
-        .form-group input:disabled {
-            background: #f5f5f5;
-            opacity: 0.7;
-        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-        /* ===== LOCATION ===== */
-        .location-section {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
+        /* LOCATION */
+        .location-section { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .location-status {
+            flex: 1; font-size: 13px; padding: 10px 12px; border-radius: var(--radius-sm);
+            background: #f8f8f8; border: 1px solid var(--border); min-height: 42px;
+            display: flex; align-items: center; gap: 6px;
         }
-        .location-section .location-status {
-            flex: 1;
-            font-size: 14px;
-            padding: 8px 12px;
-            border-radius: 6px;
-            background: #f8f8f8;
-            border: 1px solid #e0e0e0;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-        }
-        .location-section .location-status.success {
-            background: #e8f5ee;
-            border-color: #000;
-        }
-        .location-section .location-status.error {
-            background: #fef0f0;
-            border-color: #cc0000;
-            color: #cc0000;
-        }
+        .location-status.success { background: #d1fae5; border-color: var(--accent); color: #065f46; }
+        .location-status.error   { background: #fee2e2; border-color: var(--accent-2); color: #991b1b; }
+
+        /* BUTTONS */
         .btn-secondary {
-            padding: 10px 20px;
-            background: transparent;
-            color: #000;
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-            white-space: nowrap;
+            padding: 10px 20px; background: transparent; color: var(--ink);
+            border: 1px solid var(--border); border-radius: 10px; font-weight: 500; font-size: 14px;
+            cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; white-space: nowrap;
         }
-        .btn-secondary:hover {
-            border-color: #000;
-            background: #f5f5f5;
-        }
-        .btn-secondary:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+        .btn-secondary:hover:not(:disabled) { border-color: var(--ink); background: var(--bg); }
+        .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* ===== PLACE ORDER ===== */
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: #000;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            font-family: 'Inter', sans-serif;
+        .btn-place-order {
+            width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none;
+            border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s; font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 4px 16px rgba(10,107,94,0.25); margin-top: 4px;
         }
-        .btn-primary:hover:not(:disabled) {
-            opacity: 0.8;
+        .btn-place-order:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+        .btn-place-order:active:not(:disabled) { transform: translateY(0); }
+        .btn-place-order:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-place-order .spinner {
+            display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.35);
+            border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
         }
-        .btn-primary:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .btn-primary .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            margin: 0 auto;
-        }
-        .btn-primary.loading .spinner {
-            display: block;
-        }
-        .btn-primary.loading .btn-text {
-            display: none;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .btn-place-order.loading .spinner { display: block; }
+        .btn-place-order.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== TOAST ===== */
-        .toast-container {
-            position: fixed;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: 90%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            align-items: center;
-            pointer-events: none;
+        /* TOAST */
+        #toastContainer {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999;
+            width: 92%; max-width: 400px; display: flex; flex-direction: column; gap: 8px;
+            align-items: center; pointer-events: none;
         }
         .toast {
-            background: #000;
-            color: #fff;
-            padding: 14px 20px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 14px;
-            width: 100%;
-            font-family: 'Inter', sans-serif;
-            pointer-events: auto;
-            animation: slideUp 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: #1e2226; color: #fff; padding: 12px 18px; border-radius: 12px;
+            text-align: center; font-size: 13px; font-weight: 500; width: 100%;
+            pointer-events: auto; animation: slideUp 0.3s ease;
         }
-        .toast.success { background: #000; }
-        .toast.error { background: #cc0000; }
-        .toast.warning { background: #cc8800; }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .toast.success { background: #0b2e1a; }
+        .toast.error   { background: #7a1a1a; }
+        .toast.warning { background: #6b4f00; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ===== COUNTDOWN ===== */
+        /* COUNTDOWN OVERLAY */
         .countdown-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 9998;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.72); z-index: 9998;
+            align-items: center; justify-content: center; backdrop-filter: blur(8px);
         }
-        .countdown-overlay.show {
-            display: flex;
-        }
+        .countdown-overlay.show { display: flex; }
         .countdown-box {
-            background: #fff;
-            padding: 40px;
-            border-radius: 16px;
-            text-align: center;
-            max-width: 400px;
+            background: #fff; padding: 40px 32px; border-radius: 20px;
+            text-align: center; max-width: 380px; width: 90%;
         }
-        .countdown-box .emoji {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 12px;
-        }
-        .countdown-box h2 {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-        .countdown-box p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 16px;
-        }
-        .countdown-box .number {
-            font-size: 48px;
-            font-weight: 800;
-        }
+        .countdown-box .emoji { font-size: 52px; display: block; margin-bottom: 12px; }
+        .countdown-box h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+        .countdown-box p { color: var(--ink-2); font-size: 14px; margin-bottom: 20px; }
+        .countdown-box .number { font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; }
         .countdown-box .cancel-btn {
-            margin-top: 16px;
-            padding: 8px 24px;
-            background: transparent;
-            color: #000;
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
+            margin-top: 20px; padding: 10px 28px; background: transparent; color: var(--ink);
+            border: 1px solid var(--border); border-radius: 10px; font-weight: 500; font-size: 14px;
+            cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
         }
-        .countdown-box .cancel-btn:hover {
-            border-color: #000;
-        }
+        .countdown-box .cancel-btn:hover { border-color: var(--ink); background: var(--bg); }
 
-        /* ===== RESPONSIVE ===== */
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.96); backdrop-filter: blur(14px);
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; padding: 6px 0 10px; z-index: 99;
+        }
+        .bottom-nav .nav-item {
+            display: flex; flex-direction: column; align-items: center; font-size: 9px;
+            color: var(--ink-2); transition: color 0.2s; cursor: pointer; gap: 1px;
+            background: none; border: none; font-family: 'Inter', sans-serif;
+            position: relative; text-decoration: none; padding: 2px 6px;
+        }
+        .bottom-nav .nav-item .icon { font-size: 20px; }
+        .bottom-nav .nav-item.active { color: var(--accent); }
+        @media (min-width: 768px) { .bottom-nav { display: none !important; } }
         @media (max-width: 480px) {
-            .section {
-                padding: 16px;
-            }
-            .location-section {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .location-section .location-status {
-                min-height: 36px;
-                font-size: 13px;
-            }
-            .btn-secondary {
-                width: 100%;
-                text-align: center;
-            }
+            .section { padding: 14px; }
+            .location-section { flex-direction: column; align-items: stretch; }
+            .btn-secondary { width: 100%; text-align: center; }
+            .form-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== NAVBAR ===== -->
-    <nav class="navbar">
-        <div class="logo">
-            <span>🦁</span>
-            Simha
-            <span class="sub">Nepal</span>
-        </div>
+<div class="app">
+
+    <!-- DESKTOP NAV -->
+    <nav class="top-nav">
+        <div class="logo">🦁 <span>Simha</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop-listing.html">Shops</a></li>
+            <li><a href="orders.html">Orders</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
         <div class="nav-actions">
-            <button class="back-btn" onclick="window.location.href='cart.html'">←</button>
-            <div class="profile-avatar" id="profileAvatar" onclick="window.location.href='profile.html'">👤</div>
+            <button class="notif-btn" onclick="window.location.href='notifications.html'">
+                🔔<span class="badge" id="notifBadge">0</span>
+            </button>
+            <div class="profile-btn" id="profileAvatar" onclick="window.location.href='profile.html'">👤</div>
         </div>
     </nav>
 
-    <!-- ===== MAIN ===== -->
-    <main class="container">
-
-        <h1 style="font-size:24px;font-weight:800;margin:16px 0;">📋 Checkout</h1>
-
-        <!-- ===== ORDER SUMMARY ===== -->
-        <div class="section" id="orderSummary">
-            <h2>Order Summary</h2>
-            <div class="shop-name-header" id="summaryShopName">Shop Name</div>
-            <div id="summaryItems">
-                <div style="text-align:center;padding:20px;color:#888;">Loading...</div>
-            </div>
-            <div class="order-total">
-                <span>Total</span>
-                <span id="summaryTotal">Rs. 0</span>
+    <!-- MOBILE HEADER -->
+    <header class="header">
+        <div class="header-top">
+            <div class="brand"><h1>🦁 <span>Simha</span></h1></div>
+            <div class="actions">
+                <button onclick="window.location.href='notifications.html'">🔔<span class="badge" id="notifBadgeMobile">0</span></button>
+                <button onclick="window.location.href='profile.html'">👤</button>
             </div>
         </div>
+    </header>
 
-        <!-- ===== CUSTOMER INFO ===== -->
-        <div class="section">
-            <h2>Customer Information</h2>
-            <form id="checkoutForm">
-                <div class="form-group">
-                    <label>Full Name *</label>
-                    <input type="text" id="customerName" placeholder="Your full name" required>
-                </div>
-                <div class="form-group">
-                    <label>Email *</label>
-                    <input type="email" id="customerEmail" placeholder="your@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label>Phone Number *</label>
-                    <input type="tel" id="customerPhone" placeholder="9841234567" required>
-                </div>
-                <div class="form-group">
-                    <label>Delivery Address *</label>
-                    <input type="text" id="customerAddress" placeholder="Street, Tole, City" required>
-                </div>
-                <div class="form-group">
-                    <label>District</label>
-                    <select id="customerDistrict">
-                        <option value="">Select District</option>
-                        <option value="Kathmandu">Kathmandu</option>
-                        <option value="Lalitpur">Lalitpur</option>
-                        <option value="Bhaktapur">Bhaktapur</option>
-                        <option value="Dhading">Dhading</option>
-                        <option value="Chitwan">Chitwan</option>
-                        <option value="Pokhara">Pokhara</option>
-                        <option value="Butwal">Butwal</option>
-                        <option value="Biratnagar">Biratnagar</option>
-                        <option value="Birgunj">Birgunj</option>
-                        <option value="Nepalgunj">Nepalgunj</option>
-                        <option value="Dhangadhi">Dhangadhi</option>
-                    </select>
-                </div>
-            </form>
+    <div class="page-header">
+        <a class="back-btn" href="cart.html">←</a>
+        <h1>📋 Checkout</h1>
+    </div>
+
+    <!-- ORDER SUMMARY -->
+    <div class="section">
+        <h2>🛒 Order Summary</h2>
+        <div class="shop-name-header" id="summaryShopName">🏪 Loading shop...</div>
+        <div id="summaryItems">
+            <div style="text-align:center;padding:20px;color:var(--ink-2);">Loading items...</div>
         </div>
-
-        <!-- ===== LOCATION ===== -->
-        <div class="section">
-            <h2>📍 Live Location</h2>
-            <div class="location-section">
-                <div class="location-status" id="locationStatus">
-                    📍 Click below to share your live location
-                </div>
-                <button class="btn-secondary" id="locationBtn" onclick="getLocation()">
-                    📍 Share Location
-                </button>
-            </div>
-        </div>
-
-        <!-- ===== PLACE ORDER ===== -->
-        <button class="btn-primary" id="placeOrderBtn" onclick="placeOrder()">
-            <span class="btn-text">📨 Place Order via WhatsApp</span>
-            <span class="spinner"></span>
-        </button>
-
-    </main>
-
-    <!-- ===== COUNTDOWN OVERLAY ===== -->
-    <div class="countdown-overlay" id="countdownOverlay">
-        <div class="countdown-box">
-            <span class="emoji">📨</span>
-            <h2>Opening WhatsApp</h2>
-            <p>Redirecting to WhatsApp in...</p>
-            <div class="number" id="countdownNumber">3</div>
-            <button class="cancel-btn" onclick="cancelOrder()">Cancel</button>
+        <div class="order-total">
+            <span>Total</span>
+            <span id="summaryTotal">Rs. 0</span>
         </div>
     </div>
 
-    <!-- ===== TOAST ===== -->
-    <div class="toast-container" id="toastContainer"></div>
+    <!-- CUSTOMER INFORMATION -->
+    <div class="section">
+        <h2>👤 Customer Information</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="customerName">Full Name *</label>
+                <input type="text" id="customerName" placeholder="Your full name" autocomplete="name">
+            </div>
+            <div class="form-group">
+                <label for="customerPhone">Phone Number *</label>
+                <input type="tel" id="customerPhone" placeholder="9841234567" autocomplete="tel">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="customerEmail">Email *</label>
+            <input type="email" id="customerEmail" placeholder="your@email.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label for="customerAddress">Delivery Address *</label>
+            <input type="text" id="customerAddress" placeholder="Street, Tole, City" autocomplete="street-address">
+        </div>
+        <div class="form-group">
+            <label for="customerDistrict">District</label>
+            <select id="customerDistrict">
+                <option value="">Select District</option>
+                <option value="Kathmandu">Kathmandu</option>
+                <option value="Lalitpur">Lalitpur</option>
+                <option value="Bhaktapur">Bhaktapur</option>
+                <option value="Dhading">Dhading</option>
+                <option value="Chitwan">Chitwan</option>
+                <option value="Pokhara">Pokhara</option>
+                <option value="Butwal">Butwal</option>
+                <option value="Biratnagar">Biratnagar</option>
+                <option value="Birgunj">Birgunj</option>
+                <option value="Nepalgunj">Nepalgunj</option>
+                <option value="Dhangadhi">Dhangadhi</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="customerNotes">Order Notes (optional)</label>
+            <input type="text" id="customerNotes" placeholder="Special instructions, landmarks...">
+        </div>
+    </div>
 
-    <!-- ============================================================ -->
-    <!-- ===== FIREBASE + ALL JAVASCRIPT (INTERNAL) ===== -->
-    <!-- ============================================================ -->
-    <script type="importmap">
-    {
-        "imports": {
-            "firebase/app": "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
-            "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
-        }
+    <!-- LIVE LOCATION -->
+    <div class="section">
+        <h2>📍 Live Location</h2>
+        <div class="location-section">
+            <div class="location-status" id="locationStatus">
+                📍 Share your live location for accurate delivery
+            </div>
+            <button class="btn-secondary" id="locationBtn">📍 Share Location</button>
+        </div>
+    </div>
+
+    <!-- PLACE ORDER BUTTON -->
+    <button class="btn-place-order" id="placeOrderBtn">
+        <span class="btn-text">📨 Place Order via WhatsApp</span>
+        <span class="spinner"></span>
+    </button>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <a class="nav-item" href="index.html"><span class="icon">🏠</span>Home</a>
+        <a class="nav-item" href="shop-listing.html"><span class="icon">🏪</span>Shops</a>
+        <a class="nav-item active" href="cart.html"><span class="icon">🛒</span>Cart</a>
+        <a class="nav-item" href="orders.html"><span class="icon">📋</span>Orders</a>
+        <a class="nav-item" href="profile.html"><span class="icon">👤</span>Profile</a>
+    </nav>
+
+</div>
+
+<!-- COUNTDOWN OVERLAY -->
+<div class="countdown-overlay" id="countdownOverlay">
+    <div class="countdown-box">
+        <span class="emoji">📨</span>
+        <h2>Opening WhatsApp</h2>
+        <p>Your order is saved. Redirecting in...</p>
+        <div class="number" id="countdownNumber">3</div>
+        <button class="cancel-btn" id="cancelCountdownBtn">Cancel Redirect</button>
+    </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script type="importmap">
+{
+    "imports": {
+        "firebase/app":       "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+        "firebase/auth":      "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
     }
-    </script>
+}
+</script>
 
-    <script type="module">
-        // ============================================================
-        // FIREBASE IMPORTS
-        // ============================================================
-        import { initializeApp } from 'firebase/app';
-        import { getAuth, onAuthStateChanged } from 'firebase/auth';
-        import {
-            getFirestore,
-            collection,
-            doc,
-            getDoc,
-            getDocs,
-            setDoc,
-            updateDoc,
-            deleteDoc,
-            query,
-            where,
-            serverTimestamp,
-            runTransaction,
-            increment,
-            writeBatch
-        } from 'firebase/firestore';
+<script type="module">
+    import { initializeApp } from 'firebase/app';
+    import { getAuth, onAuthStateChanged } from 'firebase/auth';
+    import {
+        getFirestore, collection, doc, getDoc, setDoc, updateDoc,
+        serverTimestamp, runTransaction
+    } from 'firebase/firestore';
 
-        // ============================================================
-        // FIREBASE CONFIG
-        // ============================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyDJLnUB8XnXWPEtSRAMuQr9ASmD16HLIJc",
-            authDomain: "bishalshrestha17-de676.firebaseapp.com",
-            projectId: "bishalshrestha17-de676",
-            storageBucket: "bishalshrestha17-de676.firebasestorage.app",
-            messagingSenderId: "631628771230",
-            appId: "1:631628771230:web:389c6430535f6a46b6708f"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDJLnUB8XnXWPEtSRAMuQr9ASmD16HLIJc",
+        authDomain: "bishalshrestha17-de676.firebaseapp.com",
+        projectId: "bishalshrestha17-de676",
+        storageBucket: "bishalshrestha17-de676.firebasestorage.app",
+        messagingSenderId: "631628771230",
+        appId: "1:631628771230:web:389c6430535f6a46b6708f"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
 
-        // ============================================================
-        // STATE
-        // ============================================================
-        let shopId = null;
-        let cartItems = [];
-        let shopData = null;
-        let userData = null;
-        let locationCoords = null;
-        let isOrderPlacing = false;
-        let countdownTimer = null;
+    // ── STATE ────────────────────────────────────────────────────
+    let shopId        = null;
+    let cartItems     = [];
+    let shopData      = null;
+    let locationCoords = null;
+    let isPlacing     = false;
+    let countdownTimer = null;
+    let whatsappUrlPending = null;
 
-        // ============================================================
-        // DOM REFS
-        // ============================================================
-        const profileAvatar = document.getElementById('profileAvatar');
-        const summaryItems = document.getElementById('summaryItems');
-        const summaryTotal = document.getElementById('summaryTotal');
-        const summaryShopName = document.getElementById('summaryShopName');
-        const locationStatus = document.getElementById('locationStatus');
-        const placeOrderBtn = document.getElementById('placeOrderBtn');
-        const countdownOverlay = document.getElementById('countdownOverlay');
-        const countdownNumber = document.getElementById('countdownNumber');
+    // ── DOM REFS ─────────────────────────────────────────────────
+    const profileAvatar    = document.getElementById('profileAvatar');
+    const summaryItems     = document.getElementById('summaryItems');
+    const summaryTotal     = document.getElementById('summaryTotal');
+    const summaryShopName  = document.getElementById('summaryShopName');
+    const locationStatus   = document.getElementById('locationStatus');
+    const locationBtn      = document.getElementById('locationBtn');
+    const placeOrderBtn    = document.getElementById('placeOrderBtn');
+    const countdownOverlay = document.getElementById('countdownOverlay');
+    const countdownNumber  = document.getElementById('countdownNumber');
+    const cancelCountdownBtn = document.getElementById('cancelCountdownBtn');
 
-        // Form fields
-        const customerName = document.getElementById('customerName');
-        const customerEmail = document.getElementById('customerEmail');
-        const customerPhone = document.getElementById('customerPhone');
-        const customerAddress = document.getElementById('customerAddress');
-        const customerDistrict = document.getElementById('customerDistrict');
+    const customerName     = document.getElementById('customerName');
+    const customerEmail    = document.getElementById('customerEmail');
+    const customerPhone    = document.getElementById('customerPhone');
+    const customerAddress  = document.getElementById('customerAddress');
+    const customerDistrict = document.getElementById('customerDistrict');
+    const customerNotes    = document.getElementById('customerNotes');
 
-        // ============================================================
-        // TOAST
-        // ============================================================
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                toast.style.transition = 'all 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-        window.showToast = showToast;
+    // ── TOAST ────────────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => {
+            t.style.transition = 'opacity 0.3s, transform 0.3s';
+            t.style.opacity = '0';
+            t.style.transform = 'translateY(10px)';
+            setTimeout(() => t.remove(), 300);
+        }, 2800);
+    }
 
-        // ============================================================
-        // GET SHOP ID FROM URL
-        // ============================================================
-        function getShopIdFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('shopId') || sessionStorage.getItem('checkoutShopId');
+    // ── LOAD CHECKOUT DATA ───────────────────────────────────────
+    async function loadCheckoutData() {
+        const params = new URLSearchParams(window.location.search);
+        shopId = params.get('shopId') || sessionStorage.getItem('checkoutShopId');
+
+        if (!shopId) {
+            showToast('No shop selected for checkout', 'error');
+            window.location.href = 'cart.html';
+            return;
         }
 
-        // ============================================================
-        // LOAD CHECKOUT DATA
-        // ============================================================
-        async function loadCheckoutData() {
-            shopId = getShopIdFromUrl();
-            if (!shopId) {
-                showToast('No shop selected for checkout', 'error');
+        const user = auth.currentUser;
+
+        try {
+            // Load user profile → pre-fill form
+            const userSnap = await getDoc(doc(db, 'users', user.uid));
+            if (userSnap.exists()) {
+                const u = userSnap.data();
+                customerName.value  = u.name  || user.displayName || '';
+                customerEmail.value = u.email || user.email || '';
+                customerPhone.value = u.phone || '';
+                if (u.deliveryAddresses?.length) {
+                    customerAddress.value  = u.deliveryAddresses[0].address  || '';
+                    customerDistrict.value = u.deliveryAddresses[0].district || '';
+                }
+            } else {
+                // Fallback to Firebase Auth fields
+                customerName.value  = user.displayName || '';
+                customerEmail.value = user.email || '';
+            }
+
+            // Load shop data
+            const shopSnap = await getDoc(doc(db, 'shops', shopId));
+            if (!shopSnap.exists()) {
+                showToast('Shop not found', 'error');
+                window.location.href = 'cart.html';
+                return;
+            }
+            shopData = shopSnap.data();
+            summaryShopName.textContent = `🏪 ${shopData.shopName || 'Shop'}`;
+
+            // Load cart items for this shop
+            const cartSnap = await getDoc(doc(db, 'cart', user.uid));
+            if (cartSnap.exists()) {
+                const all = cartSnap.data().items || [];
+                cartItems = all.filter(i => (i.shopId || '') === shopId);
+            }
+
+            if (!cartItems.length) {
+                showToast('No items in cart for this shop', 'error');
                 window.location.href = 'cart.html';
                 return;
             }
 
-            const user = auth.currentUser;
-            if (!user) {
-                showToast('Please login to checkout', 'error');
-                window.location.href = 'auth.html';
-                return;
-            }
+            renderSummary();
 
-            try {
-                // Load user data
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                if (userDoc.exists()) {
-                    userData = userDoc.data();
-                    customerName.value = userData.name || '';
-                    customerEmail.value = userData.email || '';
-                    customerPhone.value = userData.phone || '';
-                    if (userData.deliveryAddresses && userData.deliveryAddresses.length > 0) {
-                        customerAddress.value = userData.deliveryAddresses[0].address || '';
-                        customerDistrict.value = userData.deliveryAddresses[0].district || '';
-                    }
-                }
-
-                // Load shop data
-                const shopDoc = await getDoc(doc(db, 'shops', shopId));
-                if (shopDoc.exists()) {
-                    shopData = shopDoc.data();
-                    summaryShopName.textContent = `🏪 ${shopData.shopName || 'Shop'}`;
-                } else {
-                    showToast('Shop not found', 'error');
-                    window.location.href = 'cart.html';
-                    return;
-                }
-
-                // Load cart items for this shop
-                const cartDoc = await getDoc(doc(db, 'cart', user.uid));
-                if (cartDoc.exists()) {
-                    const allItems = cartDoc.data().items || [];
-                    cartItems = allItems.filter(item => (item.shopId || '') === shopId);
-                }
-
-                if (cartItems.length === 0) {
-                    showToast('No items in cart for this shop', 'error');
-                    window.location.href = 'cart.html';
-                    return;
-                }
-
-                renderSummary();
-
-            } catch (error) {
-                console.error('Error loading checkout data:', error);
-                showToast('Failed to load checkout data', 'error');
-            }
+        } catch (err) {
+            console.error('loadCheckoutData error:', err);
+            showToast('Failed to load checkout data', 'error');
         }
+    }
 
-        // ============================================================
-        // RENDER SUMMARY
-        // ============================================================
-        function renderSummary() {
-            const total = cartItems.reduce((sum, item) => sum + (item.price || 0) * (item.qty || 0), 0);
-            
-            summaryItems.innerHTML = cartItems.map(item => `
-                <div class="order-summary-item">
-                    <span class="name">${item.productName || 'Product'}</span>
-                    <span class="qty">×${item.qty || 0}</span>
-                    <span class="price">Rs. ${((item.price || 0) * (item.qty || 0)).toLocaleString()}</span>
+    // ── RENDER SUMMARY ───────────────────────────────────────────
+    function renderSummary() {
+        const total = cartItems.reduce((s, i) => s + (i.price || 0) * (i.qty || 0), 0);
+
+        summaryItems.innerHTML = cartItems.map(item => `
+            <div class="order-summary-item">
+                <img class="thumb" src="${item.imageURL || ''}" alt="${item.productName || ''}"
+                     onerror="this.src='https://picsum.photos/40/40'">
+                <div class="info">
+                    <div class="name">${item.productName || 'Product'}</div>
+                    <div class="qty">×${item.qty || 0} ${item.unit || ''}</div>
                 </div>
-            `).join('');
+                <div class="price">Rs. ${((item.price || 0) * (item.qty || 0)).toLocaleString()}</div>
+            </div>`).join('');
 
-            summaryTotal.textContent = `Rs. ${total.toLocaleString()}`;
+        summaryTotal.textContent = `Rs. ${total.toLocaleString()}`;
+    }
+
+    // ── LOCATION ─────────────────────────────────────────────────
+    locationBtn.addEventListener('click', () => {
+        locationBtn.disabled = true;
+        locationBtn.textContent = '⏳ Getting...';
+        locationStatus.textContent = '📍 Getting your location...';
+        locationStatus.className = 'location-status';
+
+        if (!navigator.geolocation) {
+            locationStatus.textContent = '❌ Geolocation not supported on this device';
+            locationStatus.className = 'location-status error';
+            locationBtn.disabled = false;
+            locationBtn.textContent = '📍 Share Location';
+            return;
         }
 
-        // ============================================================
-        // GET LOCATION
-        // ============================================================
-        window.getLocation = function() {
-            const btn = document.getElementById('locationBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Getting...';
-            locationStatus.textContent = '📍 Getting your location...';
-            locationStatus.className = 'location-status';
-
-            if (!navigator.geolocation) {
-                locationStatus.textContent = '❌ Geolocation not supported by your browser';
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                locationCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                locationStatus.textContent = `✅ Location: ${locationCoords.lat.toFixed(5)}, ${locationCoords.lng.toFixed(5)}`;
+                locationStatus.className = 'location-status success';
+                locationBtn.disabled = false;
+                locationBtn.textContent = '🔄 Update Location';
+                showToast('Location captured ✅', 'success');
+            },
+            (err) => {
+                const msgs = {
+                    1: '❌ Location denied — please type your address manually.',
+                    2: '❌ Location unavailable — please type your address manually.',
+                    3: '❌ Location timed out — please type your address manually.'
+                };
+                locationStatus.textContent = msgs[err.code] || '❌ Could not get location';
                 locationStatus.className = 'location-status error';
-                btn.disabled = false;
-                btn.textContent = '📍 Share Location';
-                return;
-            }
+                locationBtn.disabled = false;
+                locationBtn.textContent = '📍 Try Again';
+            },
+            { timeout: 10000, enableHighAccuracy: true }
+        );
+    });
 
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    locationCoords = {
-                        lat: pos.coords.latitude,
-                        lng: pos.coords.longitude
-                    };
-                    locationStatus.textContent = `✅ Location captured: ${locationCoords.lat.toFixed(6)}, ${locationCoords.lng.toFixed(6)}`;
-                    locationStatus.className = 'location-status success';
-                    btn.disabled = false;
-                    btn.textContent = '📍 Update Location';
-                    showToast('Location captured! ✅', 'success');
-                },
-                (error) => {
-                    let msg = '❌ Location denied. Please type your address manually.';
-                    if (error.code === 1) {
-                        msg = '❌ Location denied. Please type your address manually.';
-                    } else if (error.code === 2) {
-                        msg = '❌ Location unavailable. Please type your address manually.';
-                    } else if (error.code === 3) {
-                        msg = '❌ Location timeout. Please type your address manually.';
+    // ── ORDER ID GENERATOR ───────────────────────────────────────
+    function generateOrderId() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let id = 'ORD-';
+        for (let i = 0; i < 8; i++) id += chars[Math.floor(Math.random() * chars.length)];
+        return id;
+    }
+
+    // ── WHATSAPP MESSAGE BUILDER ─────────────────────────────────
+    function buildWhatsAppMessage(orderId, customer, items, total) {
+        const lines = items.map(i =>
+            `• ${i.productName} ×${i.qty}${i.unit ? ' ' + i.unit : ''} = Rs.${((i.price||0)*(i.qty||0)).toLocaleString()}`
+        ).join('\n');
+
+        const mapsLink = locationCoords
+            ? `https://maps.google.com/?q=${locationCoords.lat},${locationCoords.lng}`
+            : '_(not shared)_';
+
+        return `🛍️ *NEW ORDER — Simha*\n\n` +
+               `📋 Order ID: *${orderId}*\n` +
+               `👤 Name: ${customer.name}\n` +
+               `📞 Phone: ${customer.phone}\n` +
+               `📧 Email: ${customer.email}\n` +
+               `📍 Live Location: ${mapsLink}\n` +
+               `🏠 Address: ${customer.address}\n` +
+               `📌 District: ${customer.district || 'N/A'}\n` +
+               (customer.notes ? `📝 Notes: ${customer.notes}\n` : '') +
+               `\n📦 *ITEMS:*\n${lines}\n\n` +
+               `💰 *Total: Rs. ${total.toLocaleString()}*\n\n` +
+               `_Placed via Simha App_ 🙏`;
+    }
+
+    // ── PLACE ORDER (atomic transaction) ────────────────────────
+    // FIX: Everything in one runTransaction — stock check, stock deduct, order create.
+    // If ANY step fails, ALL changes are rolled back automatically.
+    // This prevents orphaned orders with no stock deduction (or vice versa).
+    placeOrderBtn.addEventListener('click', async () => {
+        if (isPlacing) return;
+
+        const name    = customerName.value.trim();
+        const email   = customerEmail.value.trim();
+        const phone   = customerPhone.value.trim();
+        const address = customerAddress.value.trim();
+        const notes   = customerNotes.value.trim();
+
+        // ── VALIDATION ───────────────────────────────────────────
+        if (!name || !email || !phone || !address) {
+            showToast('Please fill in all required fields', 'error');
+            // Highlight empty fields
+            [customerName, customerEmail, customerPhone, customerAddress].forEach(el => {
+                if (!el.value.trim()) el.style.borderColor = 'var(--accent-2)';
+                else el.style.borderColor = '';
+            });
+            return;
+        }
+        if (!/^\d{10}$/.test(phone)) {
+            showToast('Enter a valid 10-digit phone number', 'error');
+            customerPhone.style.borderColor = 'var(--accent-2)';
+            return;
+        }
+        if (!shopData?.whatsappNumber) {
+            showToast('Shop WhatsApp number is not configured', 'error');
+            return;
+        }
+
+        isPlacing = true;
+        placeOrderBtn.classList.add('loading');
+        placeOrderBtn.disabled = true;
+
+        const user    = auth.currentUser;
+        const orderId = generateOrderId();
+        const total   = cartItems.reduce((s, i) => s + (i.price || 0) * (i.qty || 0), 0);
+
+        try {
+            // ── ATOMIC TRANSACTION ───────────────────────────────
+            // READ PHASE: stock check for every product
+            // WRITE PHASE: deduct stock, create order
+            // If stock is insufficient for ANY item → entire transaction aborts
+
+            const orderRef   = doc(db, 'orders', orderId);
+            const productRefs = cartItems.map(i => doc(db, 'products', i.productId));
+
+            await runTransaction(db, async (tx) => {
+                // 1. READ all products first (all reads must come before writes in a transaction)
+                const productSnaps = await Promise.all(productRefs.map(ref => tx.get(ref)));
+
+                // 2. Validate stock for each item
+                for (let i = 0; i < cartItems.length; i++) {
+                    const snap = productSnaps[i];
+                    const item = cartItems[i];
+
+                    if (!snap.exists()) {
+                        throw new Error(`Product "${item.productName}" no longer exists`);
                     }
-                    locationStatus.textContent = msg;
-                    locationStatus.className = 'location-status error';
-                    btn.disabled = false;
-                    btn.textContent = '📍 Share Location';
-                },
-                { timeout: 10000, enableHighAccuracy: true }
-            );
-        };
+                    const available = snap.data().stock ?? 0;
+                    if (available < item.qty) {
+                        throw new Error(
+                            `"${item.productName}" has only ${available} in stock (you need ${item.qty})`
+                        );
+                    }
+                }
 
-        // ============================================================
-        // GENERATE ORDER ID
-        // ============================================================
-        function generateOrderId() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let id = 'ORD-';
-            for (let i = 0; i < 8; i++) {
-                id += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return id;
-        }
-
-        // ============================================================
-        // BUILD WHATSAPP MESSAGE
-        // ============================================================
-        function buildWhatsAppMessage(orderId, customer, items, total, location) {
-            const itemsList = items.map(item => 
-                `• ${item.productName} x${item.qty} = Rs.${(item.price || 0) * (item.qty || 0)}`
-            ).join('\n');
-
-            const mapsLink = location && location.lat && location.lng 
-                ? `https://maps.google.com/?q=${location.lat},${location.lng}` 
-                : customer.address || 'Address not provided';
-
-            return `🛍️ *New Order - Simha*\n\n` +
-                   `📋 Order ID: ${orderId}\n` +
-                   `👤 Customer: ${customer.name}\n` +
-                   `📞 Phone: ${customer.phone}\n` +
-                   `📧 Email: ${customer.email}\n` +
-                   `📍 Location: ${mapsLink}\n` +
-                   `🏠 Address: ${customer.address || 'N/A'}\n\n` +
-                   `📦 *Items:*\n${itemsList}\n\n` +
-                   `💰 *Total: Rs.${total}*\n\n` +
-                   `Thank you for shopping on Simha! 🙏`;
-        }
-
-        // ============================================================
-        // PLACE ORDER
-        // ============================================================
-        window.placeOrder = async function() {
-            if (isOrderPlacing) return;
-
-            // Validate form
-            const name = customerName.value.trim();
-            const email = customerEmail.value.trim();
-            const phone = customerPhone.value.trim();
-            const address = customerAddress.value.trim();
-
-            if (!name || !email || !phone || !address) {
-                showToast('Please fill in all required fields', 'error');
-                return;
-            }
-
-            if (!shopData || !shopData.whatsappNumber) {
-                showToast('Shop WhatsApp number not available', 'error');
-                return;
-            }
-
-            isOrderPlacing = true;
-            placeOrderBtn.classList.add('loading');
-            placeOrderBtn.disabled = true;
-
-            try {
-                const user = auth.currentUser;
-                const orderId = generateOrderId();
-                const total = cartItems.reduce((sum, item) => sum + (item.price || 0) * (item.qty || 0), 0);
-
-                // Create order in Firestore
-                const orderData = {
-                    orderId: orderId,
-                    customerId: user.uid,
-                    customerName: name,
-                    customerEmail: email,
-                    customerPhone: phone,
+                // 3. WRITE: create the order document
+                tx.set(orderRef, {
+                    orderId,
+                    customerId:       user.uid,
+                    customerName:     name,
+                    customerEmail:    email,
+                    customerPhone:    phone,
+                    customerNotes:    notes,
                     customerLocation: locationCoords || null,
-                    deliveryAddress: address,
-                    district: customerDistrict.value || '',
-                    shopId: shopId,
-                    shopName: shopData.shopName || 'Shop',
-                    shopWhatsapp: shopData.whatsappNumber,
-                    items: cartItems.map(item => ({
-                        productId: item.productId,
-                        productName: item.productName,
-                        price: item.price,
-                        qty: item.qty,
-                        unit: item.unit || '',
-                        imageURL: item.imageURL || ''
+                    deliveryAddress:  address,
+                    district:         customerDistrict.value || '',
+                    shopId,
+                    shopName:         shopData.shopName    || 'Shop',
+                    shopWhatsapp:     shopData.whatsappNumber,
+                    items: cartItems.map(i => ({
+                        productId:   i.productId,
+                        productName: i.productName,
+                        price:       i.price,
+                        qty:         i.qty,
+                        unit:        i.unit      || '',
+                        imageURL:    i.imageURL  || ''
                     })),
-                    subtotal: total,
-                    deliveryFee: 0,
-                    totalAmount: total,
-                    status: 'pending',
+                    subtotal:      total,
+                    deliveryFee:   0,
+                    totalAmount:   total,
+                    status:        'pending',
                     paymentMethod: 'whatsapp',
                     paymentStatus: 'pending',
-                    whatsappSent: true,
-                    createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp()
-                };
+                    whatsappSent:  true,
+                    createdAt:     serverTimestamp(),
+                    updatedAt:     serverTimestamp()
+                });
 
-                await setDoc(doc(db, 'orders', orderId), orderData);
-
-                // Update stock using transaction
-                const batch = writeBatch(db);
-                for (const item of cartItems) {
-                    const productRef = doc(db, 'products', item.productId);
-                    batch.update(productRef, {
-                        stock: increment(-item.qty),
-                        sold: increment(item.qty)
-                    });
-                }
-                await batch.commit();
-
-                // Clear cart items for this shop
-                const cartRef = doc(db, 'cart', user.uid);
-                const cartDoc = await getDoc(cartRef);
-                if (cartDoc.exists()) {
-                    let allItems = cartDoc.data().items || [];
-                    allItems = allItems.filter(item => (item.shopId || '') !== shopId);
-                    await updateDoc(cartRef, { 
-                        items: allItems,
+                // 4. WRITE: deduct stock for each product
+                for (let i = 0; i < cartItems.length; i++) {
+                    const snap    = productSnaps[i];
+                    const item    = cartItems[i];
+                    const newStock = (snap.data().stock ?? 0) - item.qty;
+                    const newSold  = (snap.data().sold  ?? 0) + item.qty;
+                    tx.update(productRefs[i], {
+                        stock:     newStock,
+                        sold:      newSold,
                         updatedAt: serverTimestamp()
                     });
                 }
+            });
 
-                // Build WhatsApp message
-                const customerInfo = { name, email, phone, address };
-                const message = buildWhatsAppMessage(orderId, customerInfo, cartItems, total, locationCoords);
-                const whatsappUrl = `https://wa.me/977${shopData.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+            console.log('✅ Order + stock update committed atomically:', orderId);
 
-                // Show countdown
-                showCountdown(whatsappUrl);
-
-                showToast('Order placed! Redirecting to WhatsApp...', 'success');
-
-            } catch (error) {
-                console.error('Error placing order:', error);
-                showToast('Failed to place order: ' + error.message, 'error');
-                isOrderPlacing = false;
-                placeOrderBtn.classList.remove('loading');
-                placeOrderBtn.disabled = false;
-            }
-        };
-
-        // ============================================================
-        // SHOW COUNTDOWN
-        // ============================================================
-        function showCountdown(url) {
-            countdownOverlay.classList.add('show');
-            let count = 3;
-            countdownNumber.textContent = count;
-
-            countdownTimer = setInterval(() => {
-                count--;
-                if (count <= 0) {
-                    clearInterval(countdownTimer);
-                    countdownOverlay.classList.remove('show');
-                    // Open WhatsApp
-                    window.open(url, '_blank');
-                    // Redirect to orders page after delay
-                    setTimeout(() => {
-                        window.location.href = 'orders.html';
-                    }, 2000);
-                } else {
-                    countdownNumber.textContent = count;
+            // ── CLEAR CART FOR THIS SHOP ─────────────────────────
+            // Done OUTSIDE transaction (cart is user-owned, low-risk)
+            try {
+                const cartRef  = doc(db, 'cart', user.uid);
+                const cartSnap = await getDoc(cartRef);
+                if (cartSnap.exists()) {
+                    const remaining = (cartSnap.data().items || []).filter(i => i.shopId !== shopId);
+                    await updateDoc(cartRef, { items: remaining, updatedAt: serverTimestamp() });
                 }
-            }, 1000);
-        }
-
-        // ============================================================
-        // CANCEL ORDER
-        // ============================================================
-        window.cancelOrder = function() {
-            if (countdownTimer) {
-                clearInterval(countdownTimer);
-                countdownTimer = null;
+            } catch (cartErr) {
+                // Non-critical: cart clear failed but order is saved
+                console.warn('Cart clear failed (non-critical):', cartErr);
             }
-            countdownOverlay.classList.remove('show');
-            isOrderPlacing = false;
+
+            // ── WHATSAPP REDIRECT ────────────────────────────────
+            const customer = { name, email, phone, address, district: customerDistrict.value, notes };
+            const message  = buildWhatsAppMessage(orderId, customer, cartItems, total);
+            whatsappUrlPending = `https://wa.me/977${shopData.whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+
+            showToast('✅ Order placed! Opening WhatsApp...', 'success');
+            startCountdown();
+
+        } catch (err) {
+            console.error('placeOrder error:', err);
+
+            // User-friendly error messages
+            let userMsg = 'Failed to place order. Please try again.';
+            if (err.message.includes('stock') || err.message.includes('exists')) {
+                userMsg = err.message; // stock errors are already human-readable
+            } else if (err.code === 'permission-denied') {
+                userMsg = 'Permission denied. Please log out and log in again.';
+            } else if (err.code === 'unavailable') {
+                userMsg = 'No internet connection. Please check and try again.';
+            }
+
+            showToast(userMsg, 'error');
+            isPlacing = false;
             placeOrderBtn.classList.remove('loading');
             placeOrderBtn.disabled = false;
-            showToast('Order cancelled', 'warning');
-        };
-
-        // ============================================================
-        // PROFILE AVATAR
-        // ============================================================
-        function updateProfileAvatar(user) {
-            if (user) {
-                const name = user.displayName || user.email || 'User';
-                const initial = name.charAt(0).toUpperCase();
-                profileAvatar.textContent = initial;
-                profileAvatar.style.background = '#000';
-                profileAvatar.style.color = '#fff';
-                profileAvatar.style.border = '2px solid #000';
-                if (user.photoURL) {
-                    profileAvatar.innerHTML = `<img src="${user.photoURL}" alt="${name}">`;
-                }
-            } else {
-                profileAvatar.textContent = '👤';
-                profileAvatar.style.background = 'transparent';
-                profileAvatar.style.color = '#000';
-                profileAvatar.style.border = '2px solid #e0e0e0';
-                profileAvatar.innerHTML = '👤';
-            }
         }
+    });
 
-        // ============================================================
-        // AUTH STATE
-        // ============================================================
-        onAuthStateChanged(auth, (user) => {
-            updateProfileAvatar(user);
-            if (user) {
-                loadCheckoutData();
+    // ── COUNTDOWN ────────────────────────────────────────────────
+    function startCountdown() {
+        countdownOverlay.classList.add('show');
+        let count = 3;
+        countdownNumber.textContent = count;
+
+        countdownTimer = setInterval(() => {
+            count--;
+            if (count <= 0) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+                countdownOverlay.classList.remove('show');
+                if (whatsappUrlPending) window.open(whatsappUrlPending, '_blank');
+                setTimeout(() => { window.location.href = 'orders.html'; }, 1200);
             } else {
-                window.location.href = 'auth.html';
+                countdownNumber.textContent = count;
             }
-        });
+        }, 1000);
+    }
 
-        // ============================================================
-        // GLOBAL FUNCTIONS
-        // ============================================================
-        window.getLocation = window.getLocation;
-        window.placeOrder = window.placeOrder;
-        window.cancelOrder = window.cancelOrder;
-        window.showToast = showToast;
+    cancelCountdownBtn.addEventListener('click', () => {
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        countdownOverlay.classList.remove('show');
+        // Order is already saved — just go to orders page
+        showToast('WhatsApp redirect cancelled. Your order is saved.', 'warning');
+        setTimeout(() => { window.location.href = 'orders.html'; }, 1800);
+    });
 
-        console.log('🚀 Checkout Page loaded with WhatsApp integration');
-    </script>
+    // ── PROFILE AVATAR ───────────────────────────────────────────
+    function updateProfileAvatar(user) {
+        if (!profileAvatar) return;
+        if (user?.photoURL) {
+            profileAvatar.innerHTML = `<img src="${user.photoURL}" alt="Profile">`;
+        } else if (user) {
+            profileAvatar.textContent = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+        } else {
+            profileAvatar.innerHTML = '👤';
+        }
+    }
+
+    // ── AUTH ─────────────────────────────────────────────────────
+    onAuthStateChanged(auth, (user) => {
+        updateProfileAvatar(user);
+        if (user) {
+            loadCheckoutData();
+        } else {
+            window.location.href = 'auth.html';
+        }
+    });
+</script>
 </body>
 </html>
